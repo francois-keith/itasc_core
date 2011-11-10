@@ -1,0 +1,8 @@
+<stack>
+  <description brief="itasc_core">itasc_core unary stack</description>
+  <author>Maintained by Dominick Vanthienen</author>
+  <license>BSD,LGPL</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://orocos.org/itasc</url>
+  <depend stack="ros" />
+</stack>

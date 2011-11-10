@@ -1,0 +1,16 @@
+<package>
+  <description brief="iTaSC_core">
+    iTaSC core functionallity of the iTaSC-Skill framework
+  </description>
+  <author>Dominick Vanthienen, Ruben Smits</author>
+  <license>BSD, LGPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://www.orocos.org/itasc</url>
+  <depend package="eigen"/>
+  <depend package="orocos_kdl"/>
+  <depend package="ocl"/>
+  <depend package="rtt"/> 
+  <export>                                                                                              
+    <cpp cflags="-I${prefix}/install/include/orocos" />                       
+  </export>
+</package>
