@@ -100,7 +100,6 @@ loadService("Scene","marshalling")
 #loadService("Reporter","marshalling")
 
 # to let the ApplicationSupervisor use runScript
-loadService("Deployer","dot")
 loadService("application_supervisor","scripting") 
  
 print.ln("[run.ops] loading properties")
