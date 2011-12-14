@@ -163,10 +163,10 @@ connect("YOUR_TASK_NAME_supervisor.cartesian_tracing_trigger_events_in", "itasc_
 #   add connections between the CC and VKC for non standard ports, e.g. the pose in case of a cartesian_motion task
 #   standard itasc level ports are connected automatically
 
-# configure components
+# configure timers
 Timer.configure()
 
-# start components 
+# start timers 
 Timer.start()
 
 # start the task supervisors
