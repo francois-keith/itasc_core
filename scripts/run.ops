@@ -1,0 +1,181 @@
+# template deploy script, which can be called with corresponding bash script
+require("print")
+
+#### import components, requires correctly setup RTT_COMPONENT_PATH or ROS_PACKAGE_PATH
+import("ocl")
+import("kdl_typekit")
+import("rtt_rosnode")
+
+#import the iTaSC core
+import("itasc_core")
+#import a solver
+import("wdls_prior_vel_solver")
+#import robots and objects
+
+#import tasks
+
+#application level packages
+
+
+#### load components
+#### -------------------------------------------------------
+# general components
+loadComponent("Timer","OCL::TimerComponent")
+#loadComponent("Reporter","OCL::FileReporting")
+loadComponent("event_firer","OCL::LuaComponent")
+
+# create component 'Scene': Scene creates all ports that are iTaSC related, only extra ports have to be connected
+loadComponent("Scene", "iTaSC::Scene")
+
+#load application level components (trajectory generators...)
+loadComponent("application_supervisor","OCL::LuaComponent")
+
+#load itasc level components
+loadComponent("itasc_supervisor","OCL::LuaComponent")
+loadComponent("Solver","iTaSC::WDLSPriorVelSolver")
+
+# robot components
+
+# virtual kinematic chains
+
+# constraint controllers
+
+#### set activities
+#### -------------------------------------------------------
+# create activity for producer: period=0.01, priority=0, sched type
+### periodic activities (general and application level components)
+#setActivity("Reporter",				0.01,	1, ORO_SCHED_OTHER)
+setActivity("event_firer",			0.01,	98, ORO_SCHED_RT)
+
+### non-periodic iTaSC activities
+
+setActivity("application_supervisor",			0.0,	99, ORO_SCHED_RT)
+setActivity("itasc_supervisor",			0.0,	99, ORO_SCHED_RT)
+itasc_supervisor.setCpuAffinity(1)
+setActivity("Scene",				0.0,	98, ORO_SCHED_RT)
+Scene.setCpuAffinity(2)
+setActivity("Solver",				0.0,	98, ORO_SCHED_RT)
+Solver.setCpuAffinity(2)
+
+
+# to execute programs in the deployer, like connectToControllers
+setActivity("Deployer",				1.0,	98, ORO_SCHED_RT)
+
+#### connect peers
+#### -------------------------------------------------------
+connectPeers("Scene","Solver")
+
+connectPeers("application_supervisor","Timer")
+connectPeers("application_supervisor","itasc_supervisor")
+addPeer("application_supervisor","Deployer")
+connectPeers("application_supervisor","event_firer")
+
+connectPeers("itasc_supervisor","Timer")
+connectPeers("itasc_supervisor","Scene")
+connectPeers("itasc_supervisor","Solver")
+addPeer("itasc_supervisor","Deployer")
+connectPeers("itasc_supervisor","event_firer")
+
+
+#### lua stuff 
+#### -------------------------------------------------------
+# execute lua files
+#(important that it is before loading property files)
+
+itasc_supervisor.exec_file(rospack.find("YOUR APPLICATION PACKAGE") + "/scripts/itasc_supervisor.lua")
+application_supervisor.exec_file(rospack.find("YOUR APPLICATION PACKAGE") + "/scripts/application_supervisor.lua")
+event_firer.exec_file(rospack.find("itasc_core") + "/scripts/event_firer.lua")
+
+#configure lua components (already here so they can create the ports and properties before we connect/load them)
+
+itasc_supervisor.configure
+application_supervisor.configure
+event_firer.configure
+
+#### load property files
+#### -------------------------------------------------------
+loadService("application_supervisor","marshalling")
+loadService("itasc_supervisor","marshalling")
+loadService("Scene","marshalling")
+#loadService("Reporter","marshalling")
+
+# to let the ApplicationSupervisor use runScript
+loadService("Deployer","dot")
+loadService("application_supervisor","scripting") 
+ 
+print.ln("[run.ops] loading properties")
+# load CC and VKC properties
+
+print.ln("[run.ops] CC/VKC props loaded")
+#load trajectory generators
+
+print.ln("[run.ops] generators props loaded")
+#load robot and object properties
+
+print.ln("[run.ops] robots props loaded")
+#load supervisor properties
+application_supervisor.marshalling.updateProperties(rospack.find("YOUR_APPLICATION_PACKAGE") + "/cpf/application_supervisor.cpf")
+itasc_supervisor.marshalling.updateProperties(rospack.find("YOUR_APPLICATION_PACKAGE") + "/cpf/itasc_supervisor.cpf")
+
+
+#### connect ports
+#### -------------------------------------------------------
+# create connectionPolicies
+
+var ConnPolicy cp
+
+var ConnPolicy bufferedcp
+bufferedcp.type=1
+bufferedcp.size=32
+
+var ConnPolicy bufferedcp2
+bufferedcp2.type=1
+bufferedcp2.size=32
+bufferedcp2.lock_policy=1
+
+# timer ports
+connect("application_supervisor.trigger","Timer.timeout",cp)
+connect("itasc_supervisor.trigger","Timer.timeout",cp)
+
+# event ports
+connect("application_supervisor.application_priority_events_out", "itasc_supervisor.itasc_priority_events_in", bufferedcp)
+connect("application_supervisor.application_priority_events_in", "itasc_supervisor.itasc_priority_events_out", bufferedcp)
+#   add connections between the application supervisor and your tasks for the priority events only, with a bufferedcp
+
+connect("application_supervisor.application_trigger_events_out", "itasc_supervisor.itasc_trigger_events_in", cp)
+connect("application_supervisor.application_trigger_events_in", "itasc_supervisor.itasc_trigger_events_out", cp)
+connect("application_supervisor.application_common_events_out", "itasc_supervisor.itasc_common_events_in", bufferedcp)
+connect("application_supervisor.application_common_events_in", "itasc_supervisor.itasc_common_events_out", bufferedcp)
+
+#   add connections between the itasc supervisor and your tasks for all types of events, with the right type of connection, e.g.=
+connect("YOUR_TASK_NAME_supervisor.cartesian_tracing_common_events_out", "itasc_supervisor.itasc_common_events_in", bufferedcp)
+connect("YOUR_TASK_NAME_supervisor.cartesian_tracing_common_events_in", "itasc_supervisor.itasc_common_events_out", bufferedcp)
+connect("YOUR_TASK_NAME_supervisor.cartesian_tracing_priority_events_out", "itasc_supervisor.itasc_priority_events_in", cp)
+connect("YOUR_TASK_NAME_supervisor.cartesian_tracing_priority_events_in", "itasc_supervisor.itasc_priority_events_out", cp)
+connect("YOUR_TASK_NAME_supervisor.cartesian_tracing_trigger_events_out", "itasc_supervisor.itasc_trigger_events_in", bufferedcp2)
+connect("YOUR_TASK_NAME_supervisor.cartesian_tracing_trigger_events_in", "itasc_supervisor.itasc_trigger_events_out", cp)
+
+#   add connections between components that fire events and the FSMs that need to react on them
+
+# task ports
+#   add connections between application level components and task level components, e.g. trajectory generators and CC, 
+#   with the right connection, normally cp
+
+#   add connections between the CC and VKC for non standard ports, e.g. the pose in case of a cartesian_motion task
+#   standard itasc level ports are connected automatically
+
+# configure components
+Timer.configure()
+
+# start components 
+Timer.start()
+
+# start the task supervisors
+# order is of importance! First tasks, then itasc_supervisor, then application_supervisor !!
+YOUR_TASK_NAME_supervisor.start
+
+itasc_supervisor.start
+application_supervisor.start
+
+# Set up timer
+Timer.startTimer(application_supervisor.application_timer_id,0.01)
