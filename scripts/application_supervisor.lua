@@ -184,64 +184,20 @@ end
 -- CONFIGURE
 --- Function containing RTT specific info to configure TrajectoryGenerators
 function configureTrajectoryGenerators()
-	if ApplicationSupPeertable.lissajous_generator:configure() then print("   lissajous_generator configured") else raise_common_event("e_emergency") end
-	if ApplicationSupPeertable.cartesian_generator:configure() then print("   cartesian_generator configured") else raise_common_event("e_emergency") end
+	-- ADD HERE OPERATION CALLS TO CONFIGURE TRAJECTORY GENERATORS 
+    --if ApplicationSupPeertable.nameOfYourTrajectory_generator:configure() then print("   nameOfYourTrajectory_generator configured") else raise_common_event("e_emergency") end
 end
 
 -- START
 --- Function containing RTT specific info to start TrajectoryGenerators
 function startTrajectoryGenerators()
-	if ApplicationSupPeertable.lissajous_generator:start() then print("   lissajous_generator started") else raise_common_event("e_emergency") end
-end
-
---- Function containing RTT specific info to start TrajectoryGenerators
-function startLissajousGenerator()
-	if ApplicationSupPeertable.lissajous_generator:start() then print("   lissajous_generator started") else raise_common_event("e_emergency") end
-	if ApplicationSupPeertable.CC_cartesian_tracing:getProperty("use_pose"):set(0) then print("   CC_cartesian_tracing use_pose updated") else raise_common_event("e_emergency") end
-	if ApplicationSupPeertable.lissajous_generator:move() then print("   lissajous_generator is moving") else raise_common_event("e_emergency") end
-
-end
-
---- Function containing RTT specific info to start TrajectoryGenerators
-function startCartesianGenerator()
-	if ApplicationSupPeertable.cartesian_generator:start() then print("   cartesian_generator started") else raise_common_event("e_emergency") end
+    -- ADD OPERATION CALLS
 end
 
 --STOP
 --- Function containing RTT specific info to stop TrajectoryGenerators
 function stopTrajectoryGenerators()
-	if ApplicationSupPeertable.lissajous_generator:stop() then print("   lissajous_generator stopped") else raise_common_event("e_emergency") end
-	if ApplicationSupPeertable.cartesian_generator:stop() then print("   cartesian_generator stopped") else raise_common_event("e_emergency") end
+    -- ADD OPERATION CALLS
 end
 
---- Function containing RTT specific info to start TrajectoryGenerators
-function stopLissajousGenerator()
-	if ApplicationSupPeertable.lissajous_generator:stop() then print("   lissajous_generator stopped") else raise_common_event("e_emergency") end
-end
-
---- Function containing RTT specific info to start TrajectoryGenerators
-function stopCartesianGenerator()
-	if ApplicationSupPeertable.cartesian_generator:stop() then print("   cartesian_generator stopped") else raise_common_event("e_emergency") end
-end
-
---- Function containing RTT specific info to start the Robot Drivers
-function startDrivers()
-	if ApplicationSupPeertable.youbot_driver:start() then 
-    print("   youbot_driver started") 
-  else 
-    print("   unable to start youbot_driver ") 
-    raise_priority_event("e_emergency") 
-  end
-end
-
---- Function containing RTT specific info to unlock the Robot axes
-function unlockAxes()
-    --2=Velocity, defined in youbot_master_rtt/src/youbot_types.hpp
-    if ApplicationSupPeertable.youbot_driver:provides("Arm1"):setControllerMode(2)
-    then
-        print("   unlocked successfully the youbot axes")
-    else
-        print("   unable to unlock youbot axes")
-        raise_priority_event("e_emergency")
-    end
-end
+--INSERT APPLICATION SPECIFIC FUNCTIONS HERE
