@@ -37,9 +37,10 @@ require "rttlib"
 require "rfsm"
 require "rfsm_emem" --needed for event memory
 require "rfsm_rtt"
-require "rfsm_ext" --needed for the sequential-AND state                                                                                                                                                     
+require "rfsm_ext"  --needed for the sequential-AND state
 require "rfsmpp"    --needed for the sequential-AND state 
-require "kdlpp"    --kdl pritty print (should be included in lua path!)
+require "kdlpp"     --kdl pritty print (should be included in lua path!)
+require "rttros"    --needed for 'find_rospack'
 
 -- tc=Task Context of the compent we are in ( in this case ApplicationSuperVisor)
 tc=rtt.getTC()
