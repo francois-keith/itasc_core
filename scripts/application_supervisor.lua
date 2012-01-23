@@ -141,6 +141,8 @@ function startHook()
 	raise_common_event=gen_raise_event(common_events_out, fsm)
 	raise_priority_event=gen_raise_event(priority_events_out, fsm)	
 	raise_trigger_event=gen_raise_event(trigger_events_out, fsm)
+
+    return true
 end
 
 function updateHook() 
