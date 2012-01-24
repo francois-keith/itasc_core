@@ -88,6 +88,7 @@ function configureHook()
 	tc:addProperty(running_itasc_coordination_prop)
 
     -- fill in standard values for the properties
+    application_timer_id:set(1)
     itasc_fsm_package_prop:set("")
     composite_task_fsm_package_prop:set("")
     running_itasc_coordination_package_prop:set("")

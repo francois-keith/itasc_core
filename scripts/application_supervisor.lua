@@ -64,6 +64,7 @@ function configureHook()
 	tc:addProperty(application_fsm_prop)
 
     -- fill in standard values for the properties (this will cause it to work as in previous versions)
+    application_timer_id:set(1)
     application_fsm_package_prop:set("")
 	application_fsm_prop:set(rttros.find_rospack("itasc_core") .. "/scripts/application_fsm.lua")
 	
