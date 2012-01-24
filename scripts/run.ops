@@ -177,4 +177,9 @@ itasc_supervisor.start
 application_supervisor.start
 
 # Set up timer
+# first argument: timer identity number: in the example here, the application_timer_id property of the application_supervisor is used
+# second argument: timer period in seconds: in the example here: 0.01s=100Hz
+# make sure the all application and itasc level supervisors that have to be triggered at the same moment have the same timer_id
+# eg. application_supervisor and itasc_supervisor
+# they have a property application_timer_id for this purpose, standard set to 1
 Timer.startTimer(application_supervisor.application_timer_id,0.01)
