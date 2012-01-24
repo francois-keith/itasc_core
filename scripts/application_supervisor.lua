@@ -64,8 +64,8 @@ function configureHook()
 	tc:addProperty(application_fsm_prop)
 
     -- fill in standard values for the properties (this will cause it to work as in previous versions)
-    task_fsm_package_prop:set("")
-	task_fsm_prop:set(rttros.find_rospack("itasc_core") .. "/scripts/application_fsm.lua")
+    application_fsm_package_prop:set("")
+	application_fsm_prop:set(rttros.find_rospack("itasc_core") .. "/scripts/application_fsm.lua")
 	
     
 	-- INPUT PORTS 
