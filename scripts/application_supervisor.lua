@@ -162,11 +162,12 @@ end
 function cleanupHook()
 	-- cleanup the created ports.
 	tc:removePort(common_events_in:info().name)
+	tc:removePort(priority_events_in:info().name)
+	tc:removePort(priority_events_out:info().name)
 	-- cleanup created variables
 	common_events_in:delete()
 	priority_events_in:delete()
-	timer_id_in_fs:delete()
-	timer_id_in:delete()
+	priority_events_out:delete()
 	-- cleanup created properties
 	tc:removeProperty("application_timer_id")
    
