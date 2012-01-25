@@ -60,7 +60,6 @@ NONemergency = rfsm.composite_state{
 	StartingApplication = rfsm.simple_state{
 		entry=function()
 			print("=>ApplicationFSM->StartingApplication state")
-      startDrivers()    
 			raise_trigger_event("e_startITASC")
 		end,
 	},
