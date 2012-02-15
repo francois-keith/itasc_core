@@ -89,7 +89,7 @@ NONemergency = rfsm.composite_state{
 	ConfiguredITASC = rfsm.simple_state{
 		entry=function()
 			print("=>iTaSCFSM->ConfiguredITASC state entry")
-			raise_trigger_event("e_ITASCConfigured")
+			raise_common_event("e_ITASCConfigured")
 		end,
 	},
 
@@ -104,7 +104,7 @@ NONemergency = rfsm.composite_state{
 	StartedITASC = rfsm.simple_state{
 		entry=function()
 			print("=>iTaSCFSM->StartedITASC state entry")
-			raise_trigger_event("e_ITASCStarted")
+			raise_common_event("e_ITASCStarted")
 		end,
 	},
 
