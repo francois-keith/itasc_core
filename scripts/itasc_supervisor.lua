@@ -173,7 +173,7 @@ function startHook()
 	-- get all events from the all input ports
 	-- getevents function, which returns all data on the current port as
 	-- events. This function is called by the rFSM core to check for new events.
-	fsm.getevents = rfsm_rtt.gen_read_events(common_events_in, priority_events_in, trigger_events_in)
+	fsm.getevents = rfsm_rtt.gen_read_str_events(common_events_in, priority_events_in, trigger_events_in)
 
 	-- optional: create a string port to which the currently active
 	-- state of the FSM will be written. gen_write_fqn generates a
@@ -183,9 +183,9 @@ function startHook()
 	fsm.step_hook=rfsm_rtt.gen_write_fqn(fqn_out)
 	
 	--raise event functions
-	raise_common_event=gen_raise_event(common_events_out, fsm)		
-	raise_priority_event=gen_raise_event(priority_events_out, fsm)
-	raise_trigger_event=gen_raise_event(trigger_events_out, fsm)
+	raise_common_event=rfsm_rtt.gen_raise_str_event(common_events_out, fsm)		
+	raise_priority_event=rfsm_rtt.gen_raise_str_event(priority_events_out, fsm)
+	raise_trigger_event=rfsm_rtt.gen_raise_str_event(trigger_events_out, fsm)
 	
 	-- Functions containing RTT specific info to request operations
 	SceneCalculatePoses = peertable.Scene:getOperation("calculatePoses")
@@ -220,19 +220,6 @@ function cleanupHook()
 	trigger_events_in:delete()   
 	-- cleanup created properties
 	tc:removeProperty("application_timer_id")   
-end
-
---- Generate an event raising function.
--- The generated function accepts zero to many arguments and writes
--- them to the given port and optionally to the internal queue of fsm.
--- @param port outport to write events to
--- @param fsm events are sent to this fsm's internal queue (optional)
--- @return function to send events to the port
-function gen_raise_event(port, fsm)
-	return function (...)
-	     	for _,e in ipairs{...} do port:write(e) end
-		if fsm then rfsm.send_events(fsm, ...) end
-	end
 end
 
 --- Function containing RTT specific info to add a robot to the Scene and configure it
