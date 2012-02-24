@@ -94,6 +94,10 @@ public:
 	virtual void stopHook()=0;
 	virtual void cleanupHook()=0;
 
+    virtual bool initialize()=0;
+    virtual void updateOutputEquation()=0;
+    virtual void updateController()=0;
+
 	ConstraintController(std::string name, TaskState initial_state = Stopped) :
 		TaskContext(name, initial_state),
 		Cf(Eigen::Matrix<double, 6, 6>::Zero()),
@@ -114,6 +118,14 @@ public:
 					"diagonal elements of weighting matrix (do not fill with negative values)");
 		//ATTRIBUTES
 		this->provides()->addProperty("nc", nc);
+
+        this->addOperation("initialize", &ConstraintController::initialize, this)
+            .doc("Initialize "+this->getName());
+        this->addOperation("updateOutputEquation", &ConstraintController::updateOutputEquation, this)
+            .doc("updateOutputEquation of "+this->getName());
+        this->addOperation("updateController", &ConstraintController::updateController, this)
+            .doc("updateController of "+this->getName());
+
 	};
 	virtual ~ConstraintController() {};
 };
