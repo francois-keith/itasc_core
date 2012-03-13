@@ -136,7 +136,7 @@ function startHook()
 	-- function suitable to be added to the rFSM step hook to do this.
 	fqn_out = rtt.OutputPort("string")
 	tc:addPort(fqn_out, "currentState", "current active rFSM state")
-	fsm.step_hook=rfsm_rtt.gen_write_fqn(fqn_out)
+	rfsm.post_step_hook_add(fsm,rfsm_rtt.gen_write_fqn(fqn_out))
 
 	--raise event functions
 	raise_common_event=gen_raise_str_event(common_events_out, fsm)

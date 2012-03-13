@@ -174,13 +174,13 @@ function startHook()
 	-- getevents function, which returns all data on the current port as
 	-- events. This function is called by the rFSM core to check for new events.
 	fsm.getevents = rfsm_rtt.gen_read_str_events(common_events_in, priority_events_in, trigger_events_in)
-
+	--fsm.dbg=rfsmpp.gen_dbgcolor("itasc_fsm",{STATE_ENTER=true, STATE_EXIT=true,EFFECT=true,EXEC_PATH=true},false)
 	-- optional: create a string port to which the currently active
 	-- state of the FSM will be written. gen_write_fqn generates a
 	-- function suitable to be added to the rFSM step hook to do this.
 	fqn_out = rtt.OutputPort("string")
 	tc:addPort(fqn_out, "currentState", "current active rFSM state")
-	fsm.step_hook=rfsm_rtt.gen_write_fqn(fqn_out)
+	rfsm.post_step_hook_add(fsm,rfsm_rtt.gen_write_fqn(fqn_out))
 	
 	--raise event functions
 	raise_common_event=rfsm_rtt.gen_raise_str_event(common_events_out, fsm)		
