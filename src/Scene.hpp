@@ -47,6 +47,7 @@
 #include "ConstraintController.hpp"
 #include "VirtualKinematicChain.hpp"
 #include "Solver.hpp"
+#include "eigen_toolkit.hpp"
 
 #include <string>
 #include <sstream>

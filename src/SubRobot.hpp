@@ -48,6 +48,7 @@
 #include <kdl/jacobian.hpp>
 
 #include <Eigen/Core>
+#include "eigen_toolkit.hpp"
 
 namespace iTaSC {
 using namespace Eigen;

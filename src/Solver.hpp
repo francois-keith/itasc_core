@@ -43,6 +43,7 @@
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
 #include <rtt/Attribute.hpp>
+#include "eigen_toolkit.hpp"
 
 #include <Eigen/Core>
 

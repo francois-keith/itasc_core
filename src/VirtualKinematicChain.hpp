@@ -44,6 +44,7 @@
 #include <kdl/frames.hpp>
 #include <kdl/jntarray.hpp>
 #include <kdl/jacobian.hpp>
+#include "eigen_toolkit.hpp"
 
 #include <Eigen/Core>
 
