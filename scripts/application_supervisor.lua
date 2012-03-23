@@ -45,7 +45,7 @@ require "rttros"    --needed for 'find_rospack'
 -- tc=Task Context of the compent we are in ( in this case ApplicationSuperVisor)
 tc=rtt.getTC()
 local common_events_in, priority_events_in
-local timer_id_in_fs ,timer_id_in
+local timer_id_in_fs
 
 function configureHook()  
 	-- Peer table (to enable smaller code to request operations)
@@ -139,20 +139,21 @@ function startHook()
 	rfsm.post_step_hook_add(fsm,rfsm_rtt.gen_write_fqn(fqn_out))
 
 	--raise event functions
-	raise_common_event=gen_raise_str_event(common_events_out, fsm)
-	raise_priority_event=gen_raise_str_event(priority_events_out, fsm)
-	raise_trigger_event=gen_raise_str_event(trigger_events_out, fsm)
+	raise_common_event=rfsm_rtt.gen_raise_event(common_events_out, fsm)
+	raise_priority_event=rfsm_rtt.gen_raise_event(priority_events_out, fsm)
+	raise_trigger_event=rfsm_rtt.gen_raise_event(trigger_events_out, fsm)
 
     return true
 end
 
+timer_id_in = rtt.Variable('int')
 function updateHook() 
-	timer_id_in_fs, timer_id_in = time_trigger:read()
-
+	timer_id_in_fs = time_trigger:read(timer_id_in)
+	
 	--check whether this component is triggered by a timer and if so, whether it is the correct timer
 	if timer_id_in_fs=="NewData" then
-		if timer_id_in==application_timer_id:get() then
-			 rfsm.run(fsm)
+	   if timer_id_in:tolua()==application_timer_id:get() then
+	            rfsm.run(fsm)
 		 end
 	else 
 		rfsm.run(fsm)
