@@ -247,6 +247,8 @@ bool Scene::addRobot(const string& PeerName, const Frame& T_w_b) {
 		return false;
 	}
 
+	this->properties()->addProperty(robot->T_w_b);
+
 	nq_total += nq.get();
 	return true;
 }
