@@ -63,8 +63,6 @@ public:
 		this->ports()->addPort("q", q_port);
 		this->ports()->addPort("JuXudot", JuXudot_port);
 		this->ports()->addPort("Wq", Wq_port);
-		this->ports()->addPort("Jq", Jq_port);
-		this->ports()->addPort("T_b_e", T_b_e_port);
 
 		this->provides()->addAttribute("nq", nq);
 
@@ -94,8 +92,6 @@ protected:
 	RTT::OutputPort<KDL::JntArray> q_port;
 	RTT::OutputPort<KDL::Twist> JuXudot_port;
 	RTT::OutputPort<MatrixXd> Wq_port;
-	RTT::OutputPort<KDL::Jacobian> Jq_port;
-	RTT::OutputPort<KDL::Frame> T_b_e_port;
 
 	///input: measured joint position (to read from robot)
 	RTT::InputPort<std::vector<double> > q_from_robot;

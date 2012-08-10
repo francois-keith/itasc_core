@@ -44,6 +44,7 @@
 #include <kdl/frames.hpp>
 #include <kdl/jntarray.hpp>
 #include <kdl/jacobian.hpp>
+#include <rtt/extras/Properties.hpp>
 
 #include <Eigen/Core>
 
@@ -51,8 +52,11 @@ namespace iTaSC {
 
 class VirtualKinematicChain: public RTT::TaskContext {
 public:
-	VirtualKinematicChain(std::string name, TaskState initial_state = Stopped) :
-		TaskContext(name, initial_state) {
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	VirtualKinematicChain(std::string name, TaskState initial_state = Stopped, int nmb_Xf=6) :
+		TaskContext(name, initial_state),
+		Jf_kdl(nmb_Xf),
+		T_o1_o2(KDL::Frame::Identity()) {
 		//INPUT
 		this->ports()->addPort("T_o1_o2_in", T_o1_o2_in_port);
 		this->ports()->addPort("Jq_qdot", Jq_qdot_port);
@@ -98,6 +102,9 @@ protected:
 	RTT::OutputPort<bool> initialized;
 
 	unsigned int nfc;
+
+	KDL::Frame T_o1_o2;
+	KDL::Jacobian Jf_kdl;
 };
 
 }//end of namespace
