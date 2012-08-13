@@ -101,6 +101,87 @@ protected:
 	//Constant Attribute
 	unsigned int nq;
 
+
+//object frames
+struct ObjectFrame{
+public:
+	std::string objectFrameName;
+	unsigned int nq_chain;
+
+	///Output Pose_<segment name>_base
+	RTT::OutputPort<KDL::Frame> T_b_e_port;
+	//jacobian of <segment frame> wrt root
+	RTT::OutputPort<KDL::Jacobian> Jq_port;
+	
+	//forward kinematics solver
+	KDL::ChainFkSolverPos_recursive* fk;
+	//jacobian solver
+	KDL::ChainJntToJacSolver* jnt2jac;
+
+
+	//the jacobian of the objectframe
+	KDL::Jacobian Jq_local;
+	KDL::Jacobian Jq_refpee_local;
+	//the joints of the chain to the objectframe
+	KDL::JntArray q_local;
+	
+	//the pose of the objectframe
+	KDL::Frame T_b_e_local;
+
+	//indices of the joint positions q of_this_chain in the all-joint-vector of the robot
+	std::vector<unsigned int> q_indices;
+	//names of the joint belonging to this chain 
+	std::vector<std::string> jnt_names;
+	//RelJacobian
+	RTT::OutputPort<KDL::Jacobian> Jq_refpee_port;
+	//joints of chain from root to <segment_frame>
+	RTT::OutputPort<KDL::JntArray> q_port;
+	//names of the joint of this chain
+	RTT::OutputPort<std::vector<std::string>> jnt_names_port;
+	
+	//constructor
+	ObjectFrame( const std::string& segmentName, KDL::Chain segmentChain, std::vector<unsigned int> q_indices_in, std::vector<std::string> jnt_names_in):
+		objectFrameName(segmentName),
+		jnt_names(jnt_names_in),
+		objectFrameChain(segmentChain){
+			q_indices = q_indices_in;
+			nq_chain = objectFrameChain.getNrOfJoints();
+			if(nq > 0){
+				fk = new KDL::ChainFkSolverPos_recursive(objectFrameChain);
+				jnt2jac = new KDL::ChainJntToJacSolver(objectFrameChain);
+				if(nq_chain > 0) {
+					Jq_local = KDL::Jacobian(nq_chain);
+					Jq_local.data.setZero(6, nq_chain);
+					
+					Jq_refpee_local=KDL::Jacobian(nq_chain);
+					Jq_refpee_local.data.setZero(6, nq_chain);
+					
+					
+				}	
+			}
+			if(nq_chain > 0) {
+				q_local.resize(nq_chain);
+				q_port.write(q_local);
+			}
+		}
+		
+	~ObjectFrame(){
+		if(nq > 0){
+			delete fk;
+			delete jnt2jac;
+		}
+	}
+private: 
+	//a chain from root to <segment_frame>	
+	KDL::Chain objectFrameChain;
+
+}
+
+
+
+
+
+
 };
 }
 #endif
