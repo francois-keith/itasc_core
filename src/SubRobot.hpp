@@ -46,6 +46,11 @@
 #include <kdl/frames.hpp>
 #include <kdl/jntarray.hpp>
 #include <kdl/jacobian.hpp>
+#include <kdl/chainfksolverpos_recursive.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/jacobian.hpp>
+#include <kdl/chain.hpp>
+
 
 #include <Eigen/Core>
 
@@ -137,16 +142,16 @@ public:
 	//joints of chain from root to <segment_frame>
 	RTT::OutputPort<KDL::JntArray> q_port;
 	//names of the joint of this chain
-	RTT::OutputPort<std::vector<std::string>> jnt_names_port;
+	RTT::OutputPort<std::vector<std::string> > jnt_names_port;
 	
 	//constructor
-	ObjectFrame( const std::string& segmentName, KDL::Chain segmentChain, std::vector<unsigned int> q_indices_in, std::vector<std::string> jnt_names_in):
+	ObjectFrame( const std::string& segmentName, KDL::Chain segmentChain, std::vector<unsigned int> q_indices_in, std::vector<std::string> jnt_names_in, unsigned int nmbr_q=6):
 		objectFrameName(segmentName),
 		jnt_names(jnt_names_in),
 		objectFrameChain(segmentChain){
 			q_indices = q_indices_in;
 			nq_chain = objectFrameChain.getNrOfJoints();
-			if(nq > 0){
+			if(nmbr_q > 0){
 				fk = new KDL::ChainFkSolverPos_recursive(objectFrameChain);
 				jnt2jac = new KDL::ChainJntToJacSolver(objectFrameChain);
 				if(nq_chain > 0) {
@@ -166,18 +171,18 @@ public:
 		}
 		
 	~ObjectFrame(){
-		if(nq > 0){
 			delete fk;
 			delete jnt2jac;
-		}
 	}
 private: 
 	//a chain from root to <segment_frame>	
 	KDL::Chain objectFrameChain;
 
-}
+};
 
-
+//create object frame map
+typedef std::map<std::string, ObjectFrame*> ObjectFrameMap;
+ObjectFrameMap OFmap;
 
 
 
