@@ -145,26 +145,22 @@ public:
 	RTT::OutputPort<std::vector<std::string> > jnt_names_port;
 	
 	//constructor
-	ObjectFrame( const std::string& segmentName, KDL::Chain segmentChain, std::vector<unsigned int> q_indices_in, std::vector<std::string> jnt_names_in, unsigned int nmbr_q=6):
+	ObjectFrame( const std::string& segmentName, KDL::Chain segmentChain, std::vector<unsigned int> q_indices_in, std::vector<std::string> jnt_names_in):
 		objectFrameName(segmentName),
 		jnt_names(jnt_names_in),
 		objectFrameChain(segmentChain){
 			q_indices = q_indices_in;
 			nq_chain = objectFrameChain.getNrOfJoints();
-			if(nmbr_q > 0){
+			if(nq_chain > 0){
 				fk = new KDL::ChainFkSolverPos_recursive(objectFrameChain);
 				jnt2jac = new KDL::ChainJntToJacSolver(objectFrameChain);
-				if(nq_chain > 0) {
 					Jq_local = KDL::Jacobian(nq_chain);
 					Jq_local.data.setZero(6, nq_chain);
 					
 					Jq_refpee_local=KDL::Jacobian(nq_chain);
 					Jq_refpee_local.data.setZero(6, nq_chain);
 					
-					
-				}	
-			}
-			if(nq_chain > 0) {
+						
 				q_local.resize(nq_chain);
 				q_port.write(q_local);
 			}
