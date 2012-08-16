@@ -1,6 +1,7 @@
 /*******************************************************************************
  *                 This file is part of the iTaSC project                      *
- *                        													   *
+ *                        						       *
+ *			  (C) 2012 Pieterjan Bartels   			       *
  *                        (C) 2011 Dominick Vanthienen                         *
  *                        (C) 2010 Ruben Smits                                 *
  *                    dominick.vanthienen@mech.kuleuven.be,                    *
