@@ -101,6 +101,10 @@ protected:
 
 	///input: measured joint position (to read from robot)
 	RTT::InputPort<std::vector<double> > q_from_robot;
+	
+	std::vector<double> Wq_vec;     // joint-weights
+        std::vector<double,Eigen::aligned_allocator<double> > Wq_vec_aligned;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Wq; // joint-weight-matrix
 
 
 
