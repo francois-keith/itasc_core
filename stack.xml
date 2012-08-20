@@ -5,4 +5,5 @@
   <review status="unreviewed" notes=""/>
   <url>http://orocos.org/itasc</url>
   <depend stack="ros" />
+  <depend stack="orocos_toolchain" />
 </stack>
