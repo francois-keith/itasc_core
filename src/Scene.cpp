@@ -886,8 +886,8 @@ void Scene::calculatePoses()
 			{
 				robot->Wq_global.setIdentity(); //default: objectFrame is switched on
 			}
-			Wq_total.block(robot->start_index, robot->start_index, robot->nq, robot->nq)
-					= (robot->Wq_global * robot->Wq_local).lazy();
+			Wq_total.block(robot->start_index, robot->start_index, robot->nq, robot->nq).noalias()
+					= (robot->Wq_global * robot->Wq_local);
 		}
 	}
 	//Calculate robot poses
@@ -986,7 +986,7 @@ void Scene::calculateA()
 			else
 				{VKC->Uf.col(j).setZero();}
 		}
-		VKC->H = (VKC->Vf * VKC->Uf.transpose()).lazy();
+		VKC->H.noalias() = (VKC->Vf * VKC->Uf.transpose());
 #ifndef NDEBUG
 		log(Debug) << "H = \n" << VKC->H<< endlog();
 #endif
@@ -1047,7 +1047,7 @@ void Scene::calculateA()
 
 				//tmpCfJf_priority = Cf*Jf^-1
 				priorities[m]->tmpCfJf_priority.block(constraint->start_index, 0,
-						constraint->nc, 6) = -(constraint->Cf_local * constraint->constrainedLink->H).lazy();
+						constraint->nc, 6).noalias() = -(constraint->Cf_local * constraint->constrainedLink->H);
 #ifndef NDEBUG
 				//log(Debug) << "CfJf: " << priorities[m]->tmpCfJf_priority.block(constraint->start_index, 0, constraint->nc,6) << endlog();
 #endif
@@ -1064,9 +1064,9 @@ void Scene::calculateA()
 					JuXudot_kdl = constraint->robot1->T_w_b.get() * JuXudot_kdl;
 					JuXudot << Map<Vector3d> (JuXudot_kdl.vel.data), Map<Vector3d> (
 							JuXudot_kdl.rot.data);
-					priorities[m]->ydot_priority.segment(constraint->start_index, constraint->nc)
+					priorities[m]->ydot_priority.segment(constraint->start_index, constraint->nc).noalias()
 							+= (priorities[m]->tmpCfJf_priority.block(
-									constraint->start_index, 0, constraint->nc, 6) * JuXudot).lazy();
+									constraint->start_index, 0, constraint->nc, 6) * JuXudot);
 					//	Part of objectFrame2
 					//		JuXudot_kdl=RelTwist(b2|ee2, b2, b2) (ref.point b12 on object ee2 expressed in b2)
 					constraint->robot2->JuXudot_port.read(JuXudot_kdl);
@@ -1075,23 +1075,23 @@ void Scene::calculateA()
 					JuXudot_kdl = constraint->robot2->T_w_b.get() * JuXudot_kdl;
 					JuXudot << Map<Vector3d> (JuXudot_kdl.vel.data), Map<Vector3d> (
 							JuXudot_kdl.rot.data);
-					priorities[m]->ydot_priority.segment(constraint->start_index, constraint->nc)
+					priorities[m]->ydot_priority.segment(constraint->start_index, constraint->nc).noalias()
 							-= (priorities[m]->tmpCfJf_priority.block(
-									constraint->start_index, 0, constraint->nc, 6) * JuXudot).lazy();
+									constraint->start_index, 0, constraint->nc, 6) * JuXudot);
 				}
 				// multiply -Cf*Jf^-1 with Jq
 				//		the rows of CfJfinvJq_priority are empty at this stage
 				if (constraint->robot1->nq != 0)
-					priorities[m]->CfJfinvJq_priority.block(constraint->start_index, constraint->robot1->start_index, constraint->nc, constraint->robot1->nq)
+					priorities[m]->CfJfinvJq_priority.block(constraint->start_index, constraint->robot1->start_index, constraint->nc, constraint->robot1->nq).noalias()
 							= (priorities[m]->tmpCfJf_priority.block(
 									constraint->start_index, 0, constraint->nc, 6)
-									* constraint->objectFrame1->Jq.data).lazy();
+									* constraint->objectFrame1->Jq.data);
 				//		the rows of CfJfinvJq_priority are NOT empty at this stage if the objectFrames are on the same robot => substract from current value
 				if (constraint->robot2->nq != 0)
-					priorities[m]->CfJfinvJq_priority.block(constraint->start_index, constraint->robot2->start_index, constraint->nc, constraint->robot2->nq)
+					priorities[m]->CfJfinvJq_priority.block(constraint->start_index, constraint->robot2->start_index, constraint->nc, constraint->robot2->nq).noalias()
 					=
 					priorities[m]->CfJfinvJq_priority.block(constraint->start_index, constraint->robot2->start_index, constraint->nc, constraint->robot2->nq)
-					-(priorities[m]->tmpCfJf_priority.block(constraint->start_index, 0, constraint->nc, 6)* constraint->objectFrame2->Jq.data).lazy();
+					-(priorities[m]->tmpCfJf_priority.block(constraint->start_index, 0, constraint->nc, 6)* constraint->objectFrame2->Jq.data);
 
 				//add Cq to -Cf*Jf^-1*Jq, and store Cq-Cf*Jf^-1*Jq in A
 				// A=RelJac=cfr.RelTwist(w|?,?,w) (ref.point w expressed in w)
@@ -1128,8 +1128,8 @@ void Scene::calculateA()
 			}
 
 			priorities[m]->Wy_priority.block(constraint->start_index,
-					constraint->start_index, constraint->nc, constraint->nc)
-					= (constraint->Wy_global * constraint->Wy_local).lazy();
+					constraint->start_index, constraint->nc, constraint->nc).noalias()
+					= (constraint->Wy_global * constraint->Wy_local);
 		}
 
 		priorities[m]->A_port.write(priorities[m]->A_priority);

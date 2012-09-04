@@ -38,7 +38,7 @@
  *                                                                             *
  *******************************************************************************/
 #include "choleski_semidefinite.hpp"
-
+#include <iostream>
 namespace KDL{
 bool cholesky_semidefinite(const Eigen::MatrixXd& input,Eigen::MatrixXd& output)
 {
@@ -55,7 +55,7 @@ bool cholesky_semidefinite(const Eigen::MatrixXd& input,Eigen::MatrixXd& output)
     // check if input is square
     if(sz!=output.cols())
     {
-        std::cout<< "Error: matrix of which cholesky decomposition is asked, is not square!: returning zero matrix" << std::endl;
+        std::cout << "Error: matrix of which cholesky decomposition is asked, is not square!: returning zero matrix" << std::endl;
         output.setZero(sz,output.cols()); return false;
     }
     //check if input is a symmetric matrix

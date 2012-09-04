@@ -42,7 +42,7 @@ require "rfsmpp"    --needed for the sequential-AND state
 require "kdlpp"     --kdl pritty print (should be included in lua path!)
 require "rttros"    --needed for 'find_rospack'
 
--- tc=Task Context of the compent we are in ( in this case ApplicationSuperVisor)
+-- tc=Task Context of the component we are in ( in this case ApplicationSuperVisor)
 tc=rtt.getTC()
 local common_events_in, priority_events_in
 local timer_id_in_fs ,timer_id_in
@@ -71,7 +71,7 @@ function configureHook()
     
 	-- INPUT PORTS 
 
-	-- Port to recieve trigger from a timer
+	-- Port to receive trigger from a timer
 	time_trigger = rtt.InputPort("int")
 	tc:addEventPort(time_trigger,"trigger","Port to recieve trigger from a timer")
 
@@ -170,7 +170,6 @@ function cleanupHook()
 	priority_events_out:delete()
 	-- cleanup created properties
 	tc:removeProperty("application_timer_id")
-   
 end
 
 -- CONFIGURE

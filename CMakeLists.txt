@@ -16,7 +16,7 @@ find_package(OROCOS-RTT REQUIRED ${RTT_HINTS})
 include(${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake)
 
 orocos_use_package(rtt-marshalling)
-add_definitions(-DEIGEN2_SUPPORT)
+#add_definitions(-DEIGEN2_SUPPORT)
 orocos_component(iTaSC_Scene src/Scene.hpp src/Scene.cpp )
 
 orocos_install_headers( src/ConstraintController.hpp )

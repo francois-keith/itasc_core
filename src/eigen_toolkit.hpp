@@ -26,7 +26,7 @@
 #include <Eigen/Core>
 
 // import most common Eigen types 
-USING_PART_OF_NAMESPACE_EIGEN
+using namespace Eigen;
 namespace Eigen {
 
 class EigenToolkitPlugin: public RTT::types::TypekitPlugin {

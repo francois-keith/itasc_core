@@ -45,7 +45,7 @@
 #include <Eigen/Core>
 #include <math.h>
 
-USING_PART_OF_NAMESPACE_EIGEN;
+using namespace Eigen;
 
 namespace KDL
 {
