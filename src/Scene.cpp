@@ -400,7 +400,7 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 		priorities.push_back(priority);
 	}
 
-	ConstraintControllerStruct* constraintStructp;
+	ConstraintControllerEqualityStruct* constraintStructp;
 	//check what type it is and if constrainedInstance exists
 	//	1st check: is there a virtualLink?
 	if(virtualLinkName == "")

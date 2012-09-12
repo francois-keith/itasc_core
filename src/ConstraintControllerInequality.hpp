@@ -1,8 +1,9 @@
-/******************************************************************************
+/*******************************************************************************
  *                 This file is part of the iTaSC project                      *
  *                                                                             *
- *                        (C) 2011 Dominick Vanthienen
- *                    dominick.vanthienen@mech.kuleuven.be,
+ *			  (C) 2012 Pieterjan Bartels			       *
+ *                        (C) 2011 Dominick Vanthienen			       *
+ *                    dominick.vanthienen@mech.kuleuven.be,		       *
  *                    Department of Mechanical Engineering,                    *
  *                   Katholieke Universiteit Leuven, Belgium.                  *
  *                   http://www.orocos.org/itasc                               *
@@ -35,11 +36,10 @@
  *       POSSIBILITY OF SUCH DAMAGE.                                           *
  *                                                                             *
  *******************************************************************************/
+#ifndef _ITASC_CONSTRAINTCONTROLLER_INEQUALITY_HPP_
+#define _ITASC_CONSTRAINTCONTROLLER_INEQUALITY_HPP_
 
-#ifndef _ITASC_CONSTRAINTCONTROLLER_HPP_
-#define _ITASC_CONSTRAINTCONTROLLER_HPP_
-
-
+#include "itasc_core/ConstraintController.hpp"
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
 #include <rtt/extras/Properties.hpp>
@@ -50,74 +50,27 @@
 #include <Eigen/Core>
 
 namespace iTaSC {
-
-class ConstraintController: public RTT::TaskContext {
+//subclass of ConstraintController, containing ports for output of the minimum and maximum variables of the constraint.
+class ConstraintControllerInequality: public ConstraintController{
 
 protected:
-	///input: robot joint values
-	RTT::InputPort<KDL::JntArray> q_port;
-	///input: Feature coordinates (from a Virtual Kinematic Chain or an Interaction Model)
-	RTT::InputPort<KDL::JntArray> Chif_port;
-
-	///output:feature selection matrix
-	RTT::OutputPort<Eigen::MatrixXd> Cf_port;
-	///output:joint selection matrix
-	RTT::OutputPort<Eigen::MatrixXd> Cq_port;
-	///output: constraint weighting matrix
-	RTT::OutputPort<Eigen::MatrixXd> Wy_port;
-	///output: flag: task initialized?
-	RTT::OutputPort<bool> initialized;
-
-	//number of constraints
-	unsigned int nc;
-	//number of feature coordinates
-	unsigned int nfc;
-	//number of joints of robot 1 and 2
-	unsigned int nq;
-	//feature coordinates
-	KDL::JntArray Chif;
-	//joint values
-	KDL::JntArray q;
-	//feature selection matrix
-	Eigen::MatrixXd Cf;
-	//joint selection matrix
-	Eigen::MatrixXd Cq;
-	//Constraint weight matrix
-	Eigen::MatrixXd Wy;
-	std::vector<double> Wy_prop;
-	std::vector<double,Eigen::aligned_allocator<double> > Wy_prop_aligned;
-
+	///output: modified minimum level of constraint (at velocity level)
+	RTT::OutputPort<KDL::JntArray> ydot_min_port;
+	///output: modified maximum level of constraint (at velocity level)
+	RTT::OutputPort<KDL::JntArray> ydot_max_port;
 public:
-	virtual bool configureHook()=0;
-	virtual bool startHook()=0;
-	virtual void updateHook()=0;
-	virtual void stopHook()=0;
-	virtual void cleanupHook()=0;
-
-	ConstraintController(std::string name, TaskState initial_state = Stopped) :
-		TaskContext(name, initial_state),
-		Cf(Eigen::Matrix<double, 6, 6>::Zero()),
-		Cq(Eigen::Matrix<double, 6, 6>::Zero()),
-		Wy_prop(std::vector<double>(6, 1.0))
+	ConstraintControllerInequality(std::string name, TaskState initial_state = Stopped) :
+		ConstraintController(name, initial_state)
 	{
-		//INPUT
-		this->ports()->addPort("q", q_port);
-		this->ports()->addPort("Chif", Chif_port);
 		//OUTPUT
-		this->ports()->addPort("Cf", Cf_port);
-		this->ports()->addPort("Cq", Cq_port);
-		this->ports()->addPort("Wy", Wy_port);
-		this->ports()->addPort("initialized", initialized);
-		//PROPERTIES
-		this->provides()->addProperty("W", Wy_prop).doc(
-					"diagonal elements of weighting matrix (do not fill with negative values)");
-		//ATTRIBUTES
-		this->provides()->addProperty("nc", nc);
+		this->ports()->addPort("ydot_min", ydot_min_port);
+		this->ports()->addPort("ydot_max", ydot_max_port);
 	};
-	virtual ~ConstraintController() {};
+	virtual ~ConstraintControllerInequality() {};
+
 };
+
 
 }//end of namespace
 
 #endif
-

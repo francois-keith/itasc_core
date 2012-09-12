@@ -274,8 +274,6 @@ private:
 	struct ConstraintControllerStruct {
 	public:
 		TaskContext* peer;
-		///Input: modified constraint (at velocity level)
-		RTT::InputPort<KDL::JntArray> ydot_port;
 		///Input: feature selection matrix
 		RTT::InputPort<Eigen::MatrixXd> Cf_port;
 		///Input: joint selection matrix
@@ -311,7 +309,6 @@ private:
 
 		ConstraintControllerStruct(TaskContext* peer_in, ObjectFrame* objectFrame1_in, Robot* robot1_in, ObjectFrame* objectFrame2_in, Robot* robot2_in, VirtualLink* constrainedLink_in, const int constrainedInstanceType_in, unsigned int nc_in, unsigned int start_index_in) :
 					peer(peer_in),
-					ydot_port(peer->getName() + "_ydot"),
 					Cf_port(peer->getName() + "_Cf"),
 					Cq_port(peer->getName() + "_Cq"),
 					Wy_port(peer->getName() + "_Wy_local"),
@@ -339,6 +336,16 @@ private:
 			{
 				Cf_local = Eigen::MatrixXd::Zero(nc, constrainedLink_in->nfc);
 			}
+		}
+	};
+
+	struct ConstraintControllerEqualityStruct : ConstraintControllerStruct{
+		///Input: modified constraint (at velocity level)
+		RTT::InputPort<KDL::JntArray> ydot_port;
+		
+		ConstraintControllerEqualityStruct(TaskContext* peer_in, ObjectFrame* objectFrame1_in, Robot* robot1_in, ObjectFrame* objectFrame2_in, Robot* robot2_in, VirtualLink* constrainedLink_in, const int constrainedInstanceType_in, unsigned int nc_in, unsigned int start_index_in) : 
+					ConstraintControllerStruct(peer_in, objectFrame1_in, robot1_in, objectFrame2_in, robot2_in, constrainedLink_in, 								constrainedInstanceType_in, nc_in, start_index_in),
+					ydot_port(peer->getName() + "_ydot"){
 		}
 	};
 

@@ -20,6 +20,8 @@ orocos_use_package(rtt-marshalling)
 orocos_component(iTaSC_Scene src/Scene.hpp src/Scene.cpp )
 
 orocos_install_headers( src/ConstraintController.hpp )
+orocos_install_headers( src/ConstraintControllerEquality.hpp)
+orocos_install_headers( src/ConstraintControllerInequality.hpp )
 orocos_install_headers( src/VirtualKinematicChain.hpp )
 orocos_install_headers( src/Solver.hpp )
 orocos_install_headers( src/SubRobot.hpp )
