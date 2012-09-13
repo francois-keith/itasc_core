@@ -326,7 +326,7 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 	//determine whether or not the given ConstraintController is an inequality constraint controller
 	bool hasInequalities = false;
 	ConstraintControllerInequality* constraintClassEq = dynamic_cast<ConstraintControllerInequality*> (peer);
-	if (constraintClassp == NULL) {
+	if (constraintClassEq == NULL) {
 		hasInequalities = false; //the given constraint controller has only equalities
 	}
 	else{
@@ -529,6 +529,11 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 	//Connect ConstraintControllerStruct to the Scene
 	this->ports()->addPort(constraintStructp->ydot_port);
 	connected &= constraintStructp->ydot_port.connectTo(constraintClassp->ports()->getPort("ydot"));
+	if(hasInequalities){
+		this->ports()->addPort(((ConstraintControllerInequalityStruct*) constraintStructp)->ydotmax_port);
+		connected &= ((ConstraintControllerInequalityStruct*) constraintStructp) -> 
+									ydotmax_port.connectTo(constraintClassEq->ports()->getPort("ydot_max"));
+	}
 	this->ports()->addPort(constraintStructp->Cf_port);
 	connected &= constraintStructp->Cf_port.connectTo(constraintClassp->ports()->getPort("Cf"));
 	this->ports()->addPort(constraintStructp->Cq_port);
@@ -863,6 +868,21 @@ bool Scene::connectScene2Solver()
 					"Desired output velocity with priority of the index");
 			if(!priorities[i]->ydot_port.connectTo(the_solverp->peer->ports()->getPort(
 					externalName))){log(Error) << "[[addSolver]] unable to connect to ydot_port of priority " << i << endlog();}
+
+			if(inequalitiesPresent){
+				ssName.clear();
+				ssName << "ydot_max_" << i + 1;
+				ssName >> externalName;
+				this->ports()->addPort(externalName, priorities[i]->ymax_port);
+				if(!priorities[i]->ymax_port.connectTo(the_solverp->peer->ports()->getPort(
+						externalName))){log(Error) << "[[addSolver]] unable to connect to ydot_max_port of priority " << i << endlog();}
+				ssName.clear();
+				ssName << "inequalities_" << i + 1;
+				ssName >> externalName;
+				this->ports()->addPort(externalName, priorities[i]->Wy_port);
+				if(!priorities[i]->inequality_port.connectTo(the_solverp->peer->ports()->getPort(
+						externalName))){log(Error) << "[[addSolver]] unable to connect to inequalities_port of priority " << i << endlog();}
+			}
 		}
 	} else
 	{
@@ -877,6 +897,14 @@ bool Scene::connectScene2Solver()
 		priorities[0]->A_port.connectTo(the_solverp->peer->ports()->getPort("A"));
 		priorities[0]->Wy_port.connectTo(the_solverp->peer->ports()->getPort("Wy"));
 		priorities[0]->ydot_port.connectTo(the_solverp->peer->ports()->getPort("ydot"));
+		if(inequalitiesPresent){
+			this->ports()->addPort("ydot_max_1", priorities[0]->ymax_port).doc(
+					"Desired maximum output velocity with priority of the index, in case of equality constraints");
+			this->ports()->addPort("inequalities_1", priorities[0]->inequality_port).doc(
+					"port sending out information about whether a certain constraint is an inequality");
+			priorities[0]->inequality_port.connectTo(the_solverp->peer->ports()->getPort("inequalities"));
+			priorities[0]->ymax_port.connectTo(the_solverp->peer->ports()->getPort("ydot_max"));
+		}
 	}
 	return true;
 }
@@ -1047,13 +1075,14 @@ void Scene::calculateA()
 			//hier nog y_max_local uitlezen, indien nodig! 
 			constraint->ydot_port.read(constraint->y_dot_local);
 			priorities[m]->ydot_priority.segment(constraint->start_index, constraint->nc) = constraint->y_dot_local.data;
+
 			if(inequalitiesPresent){//scene has inequalities!
 				bool hasinequalities = (priorities[m]->inequalities.find(constraintp->first))->second;
 
 				if(hasinequalities){//constraintController has inequalities
 					//therefor we are sure we can cast to CCInequalityStruct a this point.
 					((ConstraintControllerInequalityStruct*) constraint) -> 
-								  	ymax_port.read( ((ConstraintControllerInequalityStruct*) constraint)->y_max_local);
+								  	ydotmax_port.read( ((ConstraintControllerInequalityStruct*) constraint)->y_max_local);
 					priorities[m]->ydotmax_priority.segment(constraint->start_index, constraint->nc) = 
 									((ConstraintControllerInequalityStruct*) constraint)->y_max_local.data;
 					//priorities[m]->ydot_inequalities_priority.segment(constraint->start_index, constraint->nc) = 1; 
@@ -1188,6 +1217,10 @@ void Scene::calculateA()
 		priorities[m]->A_port.write(priorities[m]->A_priority);
 		priorities[m]->Wy_port.write(priorities[m]->Wy_priority);
 		priorities[m]->ydot_port.write(priorities[m]->ydot_priority);
+		if(inequalitiesPresent){//scene has inequalities, also write the ymax and inequalities ports to the solver
+			priorities[m]->ymax_port.write(priorities[m]->ydotmax_priority);
+			priorities[m]->inequality_port.write(priorities[m]->ydot_inequalities_priority);
+		}
 #ifndef NDEBUG
 		//log(Debug) << "A_" << m << " = " << priorities[m]->A_priority << endlog();
 #endif
