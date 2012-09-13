@@ -1,6 +1,7 @@
 /*******************************************************************************
  *                 This file is part of the OROCOS iTaSC project               *
- *                        													   *
+ *                        			
+ *			  (C) 2012 Pieterjan Bartels   			       *
  *                        (C) 2011 Dominick Vanthienen                         *
  *                        (C) 2010 Ruben Smits                                 *
  *                    dominick.vanthienen@mech.kuleuven.be,                    *
@@ -72,7 +73,8 @@ Scene::Scene(const string& name) :
 	t1(Twist::Zero()),
 	t2(Twist::Zero()),
 	Jq_qdot(Twist::Zero()),
-	prioritiesOrdered(false)
+	prioritiesOrdered(false),
+	inequalitiesPresent(false)
 {
 	this->properties()->addProperty("iTaSC_configuration", iTaSC_configuration).doc(
 			"file containing the configuration of robots and virtual linkages");
@@ -138,6 +140,12 @@ bool Scene::configureHook() {
 		priorities[i]->ydot_priority = VectorXd(
 				(int) priorities[i]->nc_priority);
 		priorities[i]->ydot_priority.setZero();
+		priorities[i]->ydotmax_priority = VectorXd(
+				(int) priorities[i]->nc_priority);
+		priorities[i]->ydotmax_priority.setZero();
+		priorities[i]->ydot_inequalities_priority = VectorXd(
+				(int) priorities[i]->nc_priority);
+		priorities[i]->ydot_inequalities_priority.setZero();
 		priorities[i]->tmpCfJf_priority = MatrixXd(
 				(int) priorities[i]->nc_priority, 6);
 		priorities[i]->tmpCfJf_priority.setZero();
@@ -307,13 +315,25 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 	}
 
 	TaskContext* peer = this->getPeer(PeerName);
-	//check if peer is a valid ConstraintControllerStruct class
+	//check if peer is a valid ConstraintController class
 	ConstraintController* constraintClassp = dynamic_cast<ConstraintController*> (peer);
 	if (constraintClassp == NULL) {
 		log(Error) << "Component '" << PeerName
-				<< "'is not a valid ConstraintControllerStruct component." << endlog();
+				<< "'is not a valid ConstraintController component." << endlog();
 		return false;
 	}
+	
+	//determine whether or not the given ConstraintController is an inequality constraint controller
+	bool hasInequalities = false;
+	ConstraintControllerInequality* constraintClassEq = dynamic_cast<ConstraintControllerInequality*> (peer);
+	if (constraintClassp == NULL) {
+		hasInequalities = false; //the given constraint controller has only equalities
+	}
+	else{
+		hasInequalities = true; //the given ConstraintController is an instance of ConstraintControllerInequality
+		inequalitiesPresent = true;
+	}
+
 
 	RobotMap::iterator robotp;
 	Robot* robot1p;
@@ -400,7 +420,7 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 		priorities.push_back(priority);
 	}
 
-	ConstraintControllerEqualityStruct* constraintStructp;
+	ConstraintControllerStruct* constraintStructp;
 	//check what type it is and if constrainedInstance exists
 	//	1st check: is there a virtualLink?
 	if(virtualLinkName == "")
@@ -425,6 +445,9 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 			}
 		}
 		//Add the ConstraintControllerStruct to the ConstraintControllerMap of the right priority of the Scene
+		if(hasInequalities)
+			constraintStructp = new ConstraintControllerInequalityStruct(constraintClassp,objectFrameStruct1p, robot1p, objectFrameStruct2p, robot2p, NULL, ROBOT, nc.get(),	priorities[PriorityFromBag - 1]->nc_priority);
+		else
 		constraintStructp = new ConstraintControllerStruct(constraintClassp,objectFrameStruct1p, robot1p, objectFrameStruct2p, robot2p, NULL, ROBOT, nc.get(),	priorities[PriorityFromBag - 1]->nc_priority);
 	}else
 	{
@@ -468,6 +491,10 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 				//	return false;
 				//}
 				//Add the ConstraintControllerStruct to the ConstraintControllerMap of the right priority of the Scene
+
+				if(hasInequalities) 				
+				constraintStructp = new ConstraintControllerInequalityStruct(constraintClassp,objectFrameStruct1p, robot1p, objectFrameStruct2p, robot2p, VKC, VIRTUAL_KINEMATIC_CHAIN, nc.get(),	priorities[PriorityFromBag - 1]->nc_priority);
+				else
 				constraintStructp = new ConstraintControllerStruct(constraintClassp,objectFrameStruct1p, robot1p, objectFrameStruct2p, robot2p, VKC, VIRTUAL_KINEMATIC_CHAIN, nc.get(),	priorities[PriorityFromBag - 1]->nc_priority);
 #ifndef NDEBUG
 				log(Debug) << "ConstraintControllerStruct created for constraint/controller '"
@@ -486,6 +513,9 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 		//delete task if insertion did not succeed
 		delete constraintStructp;
 		return false;
+	}
+	else{
+		priorities[PriorityFromBag - 1]->inequalities.insert(InequalityMap::value_type(PeerName, hasInequalities));
 	}
 
 	//put the sameRobot flag in the struct
@@ -702,7 +732,7 @@ bool Scene::addSolver(const string& PeerName) {
 				<< "'is not a valid Solver component." << endlog();
 		return false;
 	}
-
+	
 	//Set nc and nq attributes of the Solver
 	Attribute<unsigned int> nq = peer->provides()->getAttribute("nq");
 	nq.set(nq_total);
@@ -712,7 +742,7 @@ bool Scene::addSolver(const string& PeerName) {
 		log(Warning)
 				<< "The proposed Solver has no provisions for task priorities. \n The program will take only primary constraints into account."
 				<< endlog();
-		//Set the nc and nq attributes of the Solver
+		//Set the nc and niq attributes of the Solver
 		Attribute<unsigned int> nc = peer->provides()->getAttribute("nc");
 		nc.set(priorities[0]->nc_priority);
 		//Create a SolverStruct
@@ -726,7 +756,8 @@ bool Scene::addSolver(const string& PeerName) {
 		//Create a SolverStruct
 		the_solverp = new SolverStruct(solverp, true);
 	}
-
+	Attribute<bool> iep = peer->provides()->getAttribute("inEqualityProvisions");
+	the_solverp->inequalityProvisions = iep.get();
 	if (the_solverp->priorityProvisions)
 	{
 		//create a port
@@ -799,6 +830,10 @@ bool Scene::connectScene2Solver()
 	//ports independent of the fact that there are priority provisions or not
 	if(!Wq_port.connectTo(the_solverp->peer->ports()->getPort("Wq"))){log(Error) << "[[addSolver]] unable to connect to Wq" << endlog();}
 	if(!qdot_port.connectTo(the_solverp->peer->ports()->getPort("qdot"))){log(Error) << "[[addSolver]] unable to connect to qdot" << endlog();}
+
+	if((!the_solverp->inequalityProvisions) && inequalitiesPresent) { //the solver doesn't have inequalityProvisions, but there are inequalities present
+		log(Error) << "[[ConnectScene2Solver] error: Scene has inequalities, but solver can't handle inequalities" << endlog();
+	}
 
 	//ports dependent of the fact that there are priority provisions or not
 	if (the_solverp->priorityProvisions)
@@ -1009,9 +1044,27 @@ void Scene::calculateA()
 #ifndef NDEBUG
 			//log(Debug) << "For '" << constraint->peer->getName()<< "', get ydot and store in ydot_total" << endlog();
 #endif
+			//hier nog y_max_local uitlezen, indien nodig! 
 			constraint->ydot_port.read(constraint->y_dot_local);
 			priorities[m]->ydot_priority.segment(constraint->start_index, constraint->nc) = constraint->y_dot_local.data;
+			if(inequalitiesPresent){//scene has inequalities!
+				bool hasinequalities = (priorities[m]->inequalities.find(constraintp->first))->second;
 
+				if(hasinequalities){//constraintController has inequalities
+					//therefor we are sure we can cast to CCInequalityStruct a this point.
+					((ConstraintControllerInequalityStruct*) constraint) -> 
+								  	ymax_port.read( ((ConstraintControllerInequalityStruct*) constraint)->y_max_local);
+					priorities[m]->ydotmax_priority.segment(constraint->start_index, constraint->nc) = 
+									((ConstraintControllerInequalityStruct*) constraint)->y_max_local.data;
+					//priorities[m]->ydot_inequalities_priority.segment(constraint->start_index, constraint->nc) = 1; 
+				}
+				else{//constraintController doesn't have inequalities
+					//put same values on ydot_max as on regular ydot
+					priorities[m]->ydotmax_priority.segment(constraint->start_index, constraint->nc) = constraint->y_dot_local.data;
+					//set corresponding segment of inequalities vector to zero, since it's isn't a constraintcontroller
+					priorities[m]->ydot_inequalities_priority.segment(constraint->start_index, constraint->nc).setZero();
+				}
+			}
 			// *** A ***
 
 			//get Cq

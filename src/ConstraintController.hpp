@@ -54,6 +54,8 @@ namespace iTaSC {
 class ConstraintController: public RTT::TaskContext {
 
 protected:
+	///output: modified constraint (at velocity level)
+	RTT::OutputPort<KDL::JntArray> ydot_port;
 	///input: robot joint values
 	RTT::InputPort<KDL::JntArray> q_port;
 	///input: Feature coordinates (from a Virtual Kinematic Chain or an Interaction Model)
@@ -104,6 +106,7 @@ public:
 		this->ports()->addPort("q", q_port);
 		this->ports()->addPort("Chif", Chif_port);
 		//OUTPUT
+		this->ports()->addPort("ydot", ydot_port);
 		this->ports()->addPort("Cf", Cf_port);
 		this->ports()->addPort("Cq", Cq_port);
 		this->ports()->addPort("Wy", Wy_port);

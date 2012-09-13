@@ -1,6 +1,7 @@
 /*******************************************************************************
  *                 This file is part of the iTaSC project                      *
- *                        													   *
+ *                        	
+ *			  (C) 2012 Pieterjan Bartels			       *
  *                        (C) 2011 Dominick Vanthienen                         *
  *                        (C) 2010 Ruben Smits                                 *
  *                    dominick.vanthienen@mech.kuleuven.be,                    *
@@ -44,6 +45,9 @@
 #include <rtt/TaskContext.hpp>
 #include <map>
 #include "SubRobot.hpp"
+#include "ConstraintController.hpp"
+#include "ConstraintControllerEquality.hpp"
+#include "ConstraintControllerInequality.hpp"
 #include "ConstraintController.hpp"
 #include "VirtualKinematicChain.hpp"
 #include "Solver.hpp"
@@ -274,6 +278,8 @@ private:
 	struct ConstraintControllerStruct {
 	public:
 		TaskContext* peer;
+		///Input: modified constraint (at velocity level)
+		RTT::InputPort<KDL::JntArray> ydot_port;
 		///Input: feature selection matrix
 		RTT::InputPort<Eigen::MatrixXd> Cf_port;
 		///Input: joint selection matrix
@@ -309,6 +315,7 @@ private:
 
 		ConstraintControllerStruct(TaskContext* peer_in, ObjectFrame* objectFrame1_in, Robot* robot1_in, ObjectFrame* objectFrame2_in, Robot* robot2_in, VirtualLink* constrainedLink_in, const int constrainedInstanceType_in, unsigned int nc_in, unsigned int start_index_in) :
 					peer(peer_in),
+					ydot_port(peer->getName() + "_ydot"),
 					Cf_port(peer->getName() + "_Cf"),
 					Cq_port(peer->getName() + "_Cq"),
 					Wy_port(peer->getName() + "_Wy_local"),
@@ -339,13 +346,15 @@ private:
 		}
 	};
 
-	struct ConstraintControllerEqualityStruct : ConstraintControllerStruct{
-		///Input: modified constraint (at velocity level)
-		RTT::InputPort<KDL::JntArray> ydot_port;
+	struct ConstraintControllerInequalityStruct : ConstraintControllerStruct {
+	//this is a struct containing two extra ports, in case inequality constraints are used. One port is for the maximum of the interval, the other one is 		for a vector containing booleans. for the minimum of the interval, the ydot_port of the superclass is used.
+	public: 
+		///Input: modified constraint, the maximum level (at velocity level)
+		RTT::InputPort<KDL::JntArray> ymax_port;
+		KDL::JntArray y_max_local;
 		
-		ConstraintControllerEqualityStruct(TaskContext* peer_in, ObjectFrame* objectFrame1_in, Robot* robot1_in, ObjectFrame* objectFrame2_in, Robot* robot2_in, VirtualLink* constrainedLink_in, const int constrainedInstanceType_in, unsigned int nc_in, unsigned int start_index_in) : 
-					ConstraintControllerStruct(peer_in, objectFrame1_in, robot1_in, objectFrame2_in, robot2_in, constrainedLink_in, 								constrainedInstanceType_in, nc_in, start_index_in),
-					ydot_port(peer->getName() + "_ydot"){
+		ConstraintControllerInequalityStruct(TaskContext* peer_in, ObjectFrame* objectFrame1_in, Robot* robot1_in, ObjectFrame* objectFrame2_in, Robot* robot2_in, VirtualLink* constrainedLink_in, const int constrainedInstanceType_in, unsigned int nc_in, unsigned int start_index_in) :
+			ConstraintControllerStruct(peer_in, objectFrame1_in, robot1_in, objectFrame2_in, robot2_in, constrainedLink_in, constrainedInstanceType_in, nc_in, start_index_in){
 		}
 	};
 
@@ -353,15 +362,19 @@ private:
 	public:
 		TaskContext* peer;
 		bool priorityProvisions;
+		bool inequalityProvisions;
 
-		SolverStruct(TaskContext* peer_in, bool priorityProvisions_in):
+		SolverStruct(TaskContext* peer_in, bool priorityProvisions_in, bool ineqProv_in = false ):
 			peer(peer_in),
-			priorityProvisions(priorityProvisions_in)
-		{}
+			priorityProvisions(priorityProvisions_in),
+			inequalityProvisions(ineqProv_in)
+		{
+		}
 	};
 
 	typedef std::map<std::string, Robot*> RobotMap;
 	typedef std::map<std::string, ConstraintControllerStruct*> ConstraintControllerMap;
+	typedef std::map<std::string, bool> InequalityMap;
 	typedef std::map<std::string, VirtualKinematicChainStruct*> VKCMap;
 
 	RobotMap robots;
@@ -373,13 +386,18 @@ private:
 	{
 	public:
 		ConstraintControllerMap constraints;
+		InequalityMap inequalities;
 		unsigned int nc_priority;
 		RTT::OutputPort<Eigen::MatrixXd> A_port;
 		RTT::OutputPort<Eigen::MatrixXd> Wy_port;
 		RTT::OutputPort<Eigen::VectorXd> ydot_port;
+		RTT::OutputPort<Eigen::VectorXd> ymax_port; //only necessary if the constraintController has inequality provisions
+		RTT::OutputPort<Eigen::VectorXd> inequality_port;//only necessary if the constraintcontroller has inequality provisions
 
 		Eigen::MatrixXd A_priority, Wy_priority, tmpCfJf_priority, CfJfinvJq_priority;
 		Eigen::VectorXd ydot_priority;
+		Eigen::VectorXd ydotmax_priority;
+		Eigen::VectorXd ydot_inequalities_priority;
 
 		Priority() :
 			//initialisations
@@ -418,6 +436,8 @@ private:
 	//screw twist to contain t1-t2: in reference frame and point w
 	KDL::Twist Jq_qdot_w;
 
+	//flag to say that there are inequalityconstraints
+	bool inequalitiesPresent;
 	//flag to say that you've completed priority ordering
 	bool prioritiesOrdered;
 

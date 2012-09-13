@@ -39,7 +39,7 @@
 #ifndef _ITASC_CONSTRAINTCONTROLLER_INEQUALITY_HPP_
 #define _ITASC_CONSTRAINTCONTROLLER_INEQUALITY_HPP_
 
-#include "itasc_core/ConstraintController.hpp"
+#include "ConstraintController.hpp"
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
 #include <rtt/extras/Properties.hpp>
@@ -55,15 +55,12 @@ class ConstraintControllerInequality: public ConstraintController{
 
 protected:
 	///output: modified minimum level of constraint (at velocity level)
-	RTT::OutputPort<KDL::JntArray> ydot_min_port;
-	///output: modified maximum level of constraint (at velocity level)
 	RTT::OutputPort<KDL::JntArray> ydot_max_port;
 public:
 	ConstraintControllerInequality(std::string name, TaskState initial_state = Stopped) :
 		ConstraintController(name, initial_state)
 	{
 		//OUTPUT
-		this->ports()->addPort("ydot_min", ydot_min_port);
 		this->ports()->addPort("ydot_max", ydot_max_port);
 	};
 	virtual ~ConstraintControllerInequality() {};

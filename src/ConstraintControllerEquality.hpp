@@ -39,7 +39,7 @@
 #ifndef _ITASC_CONSTRAINTCONTROLLER_EQUALITY_HPP_
 #define _ITASC_CONSTRAINTCONTROLLER_EQUALITY_HPP_
 
-#include "itasc_core/ConstraintController.hpp"
+#include "ConstraintController.hpp"
 #include <rtt/TaskContext.hpp>
 #include <rtt/Port.hpp>
 #include <rtt/extras/Properties.hpp>
@@ -53,16 +53,10 @@ namespace iTaSC {
 //subclass of ConstraintController, has one port, to output equality constraint value.
 class ConstraintControllerEquality: public ConstraintController{
 
-protected:
-	///output: modified constraint (at velocity level)
-	RTT::OutputPort<KDL::JntArray> ydot_port;
 public:
 	ConstraintControllerEquality(std::string name, TaskState initial_state = Stopped) :
 		ConstraintController(name, initial_state)
-	{
-		//OUTPUT
-		this->ports()->addPort("ydot", ydot_port);
-	};
+	{};
 	virtual ~ConstraintControllerEquality() {};
 };
 

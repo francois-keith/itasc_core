@@ -54,23 +54,29 @@ protected:
 	RTT::InputPort<Eigen::MatrixXd> Wy_port;
 	RTT::InputPort<Eigen::MatrixXd> Wq_port;
 	RTT::InputPort<Eigen::VectorXd> ydot_port;
+	RTT::InputPort<Eigen::VectorXd> ymax_port;
+	RTT::InputPort<std::vector<bool> > inEqualities;
 	RTT::OutputPort<Eigen::VectorXd> qdot_port;
 
 	unsigned int nc;
 	unsigned int nq;
+	bool inequalityProvisions;
 
 	virtual bool solve()=0;
 
 public:
-	Solver(const std::string& name) :
+	Solver(const std::string& name, bool inequalityProv = false) :
 		TaskContext(name, Stopped), A_port("A"), Wy_port("Wy"), Wq_port("Wq"),
 				ydot_port("ydot"), qdot_port("qdot") {
 		this->ports()->addPort(A_port);
 		this->ports()->addPort(Wy_port);
 		this->ports()->addPort(Wq_port);
 		this->ports()->addPort(ydot_port);
+		this->ports()->addPort(ymax_port);
+		this->ports()->addPort(inEqualities);
 		this->ports()->addPort(qdot_port);
 
+		this->provides()->addAttribute("inEqualityProvisions", inequalityProvisions);
 		this->provides()->addAttribute("nc",nc);
 		this->provides()->addAttribute("nq",nq);
 
