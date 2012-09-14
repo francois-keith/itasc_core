@@ -46,7 +46,6 @@
 #include <map>
 #include "SubRobot.hpp"
 #include "ConstraintController.hpp"
-#include "ConstraintControllerEquality.hpp"
 #include "ConstraintControllerInequality.hpp"
 #include "ConstraintController.hpp"
 #include "VirtualKinematicChain.hpp"

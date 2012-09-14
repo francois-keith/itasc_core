@@ -1085,7 +1085,11 @@ void Scene::calculateA()
 								  	ydotmax_port.read( ((ConstraintControllerInequalityStruct*) constraint)->y_max_local);
 					priorities[m]->ydotmax_priority.segment(constraint->start_index, constraint->nc) = 
 									((ConstraintControllerInequalityStruct*) constraint)->y_max_local.data;
-					//priorities[m]->ydot_inequalities_priority.segment(constraint->start_index, constraint->nc) = 1; 
+					//priorities[m]->ydot_inequalities_priority.segment(constraint->start_index, constraint->nc) = 1;
+					//set inequalities to 1 if there is an inequality
+					for(unsigned int k = 0; k < constraint -> nc; k++){
+						priorities[m]->ydot_inequalities_priority((constraint->start_index) + k) = 1;
+					}
 				}
 				else{//constraintController doesn't have inequalities
 					//put same values on ydot_max as on regular ydot
