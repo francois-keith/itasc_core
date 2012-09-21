@@ -60,15 +60,14 @@ protected:
 
 	unsigned int nc;
 	unsigned int nq;
-	bool inequalityProvisions;
+	unsigned int inequalityProvisions;
 
 	virtual bool solve()=0;
 
 public:
-	Solver(const std::string& name, bool inequalityProv = false) :
-		TaskContext(name, Stopped), A_port("A"), Wy_port("Wy"), Wq_port("Wq"),
-				ydot_port("ydot"), ydot_max_port("ydot_max"), inEqualities("inequalities"), qdot_port("qdot"), 
-				inequalityProvisions(inequalityProv) 
+	Solver(const std::string& name, unsigned int ineq) :
+		TaskContext(name, Stopped), inequalityProvisions(ineq), A_port("A"), Wy_port("Wy"), Wq_port("Wq"),
+				ydot_port("ydot"), ydot_max_port("ydot_max"), inEqualities("inequalities"), qdot_port("qdot")
 	{
 		this->ports()->addPort(A_port);
 		this->ports()->addPort(Wy_port);

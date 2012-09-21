@@ -725,6 +725,7 @@ bool Scene::addSolver(const string& PeerName) {
 				<< endlog();
 		return false;
 	}
+	
 	TaskContext* peer = this->getPeer(PeerName);
 	//check if peer is a valid Solver class
 	Solver* solverp = dynamic_cast<Solver*> (peer);
@@ -737,7 +738,6 @@ bool Scene::addSolver(const string& PeerName) {
 				<< "'is not a valid Solver component." << endlog();
 		return false;
 	}
-	
 	//Set nc and nq attributes of the Solver
 	Attribute<unsigned int> nq = peer->provides()->getAttribute("nq");
 	nq.set(nq_total);
@@ -761,10 +761,12 @@ bool Scene::addSolver(const string& PeerName) {
 		//Create a SolverStruct
 		the_solverp = new SolverStruct(solverp, true);
 	}
-	Attribute<bool> iep = peer->provides()->getAttribute("inEqualityProvisions");
-	the_solverp->inequalityProvisions = iep.get();
+	Attribute<unsigned int> iep = peer->provides()->getAttribute("inEqualityProvisions");
+	if(iep.get() == 0) the_solverp->inequalityProvisions = false;
+	else the_solverp->inequalityProvisions = true;
+
 	if (the_solverp->priorityProvisions)
-	{
+	{	
 		//create a port
 		if(!nc_priorities_port.connectTo(peer->ports()->getPort("nc_priorities"))){log(Error) << "[[addSolver]] unable to connect to nc_priorities" << endlog();}
 		//put the constraints per priority in a vector
@@ -830,7 +832,9 @@ bool Scene::connectScene2Robots()
 }
 //connect the ports of the Scene with the ports of the solver
 bool Scene::connectScene2Solver()
-{
+{	
+
+	
 	Logger::In in(this->getName());
 	//ports independent of the fact that there are priority provisions or not
 	if(!Wq_port.connectTo(the_solverp->peer->ports()->getPort("Wq"))){log(Error) << "[[addSolver]] unable to connect to Wq" << endlog();}
