@@ -36,6 +36,8 @@
 -- running iTaSC coordination
 require "time"
 
+local e_triggerTasks = 'e_triggerTasks'
+local e_ITASCalgorithmDone = 'e_ITASCalgorithmDone'
 return rfsm.composite_state{
 
 	initializing = rfsm.simple_state{
@@ -50,20 +52,20 @@ return rfsm.composite_state{
 	},
 
 	iTaSCcoordPhase1 = rfsm.simple_state{
-		entry=function()
+	entry=function()
 			updateRobots()
 			SceneCalculatePoses()
-			raise_trigger_event("e_triggerTasks")
+			raise_trigger_event(e_triggerTasks)
 		end,
 	},
 
 	iTaSCcoordPhase2 = rfsm.simple_state{
 		entry=function()
-			SceneCalculateA()
-			SceneSolvers_solve()
-			SceneHandOut()
-			sendToRobot()
-			raise_common_event('e_ITASCalgorithmDone')
+			 SceneCalculateA()
+			 SceneSolvers_solve()
+			 SceneHandOut()
+			 sendToRobot()
+			 raise_common_event(e_ITASCalgorithmDone)
 		end,
 
 	},

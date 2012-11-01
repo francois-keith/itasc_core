@@ -174,18 +174,18 @@ function startHook()
 	-- getevents function, which returns all data on the current port as
 	-- events. This function is called by the rFSM core to check for new events.
 	fsm.getevents = rfsm_rtt.gen_read_str_events(common_events_in, priority_events_in, trigger_events_in)
-
+	--fsm.dbg=rfsmpp.gen_dbgcolor("itasc_fsm",{STATE_ENTER=true, STATE_EXIT=true,EFFECT=true,EXEC_PATH=true},false)
 	-- optional: create a string port to which the currently active
 	-- state of the FSM will be written. gen_write_fqn generates a
 	-- function suitable to be added to the rFSM step hook to do this.
 	fqn_out = rtt.OutputPort("string")
 	tc:addPort(fqn_out, "currentState", "current active rFSM state")
-	fsm.step_hook=rfsm_rtt.gen_write_fqn(fqn_out)
+	rfsm.post_step_hook_add(fsm,rfsm_rtt.gen_write_fqn(fqn_out))
 	
 	--raise event functions
-	raise_common_event=rfsm_rtt.gen_raise_str_event(common_events_out, fsm)		
-	raise_priority_event=rfsm_rtt.gen_raise_str_event(priority_events_out, fsm)
-	raise_trigger_event=rfsm_rtt.gen_raise_str_event(trigger_events_out, fsm)
+	raise_common_event=rfsm_rtt.gen_raise_event(common_events_out, fsm)		
+	raise_priority_event=rfsm_rtt.gen_raise_event(priority_events_out, fsm)
+	raise_trigger_event=rfsm_rtt.gen_raise_event(trigger_events_out)
 	
 	-- Functions containing RTT specific info to request operations
 	SceneCalculatePoses = peertable.Scene:getOperation("calculatePoses")
@@ -196,16 +196,18 @@ function startHook()
     return true
 end
 
+local e_TimerTrigger = 'e_TimerTrigger'
+timer_id_in = rtt.Variable('int')
 function updateHook() 
-	timer_id_in_fs, timer_id_in = time_trigger:read()
-	
+
+	timer_id_in_fs = time_trigger:read(timer_id_in)
 	if timer_id_in_fs=="NewData" then
-		if timer_id_in==application_timer_id:get()then
-			rfsm.send_events(fsm, 'e_TimerTrigger')
-			rfsm.run(fsm)
-		end
+	   if timer_id_in:tolua()==application_timer_id:get()then
+	      rfsm.send_events(fsm, e_TimerTrigger)
+	      rfsm.run(fsm)
+	   end
 	else 
-		rfsm.run(fsm)
+	   rfsm.run(fsm)
 	end 
 end
 

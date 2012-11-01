@@ -16,19 +16,18 @@ find_package(OROCOS-RTT REQUIRED ${RTT_HINTS})
 include(${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake)
 
 orocos_use_package(rtt-marshalling)
-#add_definitions(-DEIGEN2_SUPPORT)
 orocos_component(iTaSC_Scene src/Scene.hpp src/Scene.cpp )
-
+target_link_libraries(iTaSC_Scene eigen_toolkit)
 orocos_install_headers( src/ConstraintController.hpp )
 orocos_install_headers( src/ConstraintControllerInequality.hpp )
 orocos_install_headers( src/VirtualKinematicChain.hpp )
 orocos_install_headers( src/Solver.hpp )
 orocos_install_headers( src/SubRobot.hpp )
 #TODO SHOULD BE DELETED WHEN CHOLESKI MOVED TO KDL
-orocos_install_headers( src/choleski_semidefinite.hpp )
+orocos_install_headers( src/choleski_semidefinite.hpp src/eigen_toolkit.hpp)
 
 orocos_typekit(eigen_toolkit src/eigen_toolkit.cpp)
 
-#TODO MOVE THIS TO KDL WHEN IT WORKS
+#TODO DELETE THIS WHEN NEW KDL VERSION WITH CHOLESKI IS STABLE
 orocos_library(choleski_semidefinite src/choleski_semidefinite.cpp)
 orocos_generate_package()

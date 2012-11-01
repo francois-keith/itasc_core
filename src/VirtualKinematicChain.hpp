@@ -45,6 +45,7 @@
 #include <kdl/jntarray.hpp>
 #include <kdl/jacobian.hpp>
 #include <rtt/extras/Properties.hpp>
+#include "eigen_toolkit.hpp"
 
 #include <Eigen/Core>
 
@@ -68,6 +69,10 @@ public:
 		this->ports()->addPort("initialized", initialized);
 
 		this->provides()->addAttribute("nfc", nfc);
+
+        this->addOperation("updateVKCE", &VirtualKinematicChain::updateVKCE, this)
+            .doc("updateVKCE of "+this->getName());
+
 	};
 
 	virtual ~VirtualKinematicChain() {};
@@ -77,7 +82,7 @@ public:
 	virtual void updateHook()=0;
 	virtual void stopHook()=0;
 	virtual void cleanupHook()=0;
-
+    virtual void updateVKCE()=0;
 protected:
 	///input: RelPose(o2|o2,o1|o1,o1) (pose of o2 on body o2 wrt. o1 on body o1 expressed in o1)
 	RTT::InputPort<KDL::Frame> T_o1_o2_in_port;
