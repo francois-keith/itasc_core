@@ -12,6 +12,6 @@
   <depend package="ocl"/>
   <depend package="rtt"/> 
   <export>                                                                                              
-    <cpp cflags="-I${prefix}/install/include/orocos -DEIGEN2_SUPPORT" />                       
+    <cpp cflags="-I${prefix}/install/include/orocos" />                       
   </export>
 </package>
