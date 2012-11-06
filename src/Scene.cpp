@@ -1,11 +1,11 @@
 /*******************************************************************************
  *                 This file is part of the OROCOS iTaSC project               *
  *                        			
- *			  (C) 2012 Pieterjan Bartels   			       *
+ *			              (C) 2012 Dominick Vanthienen      			       *
+ *			              (C) 2012 Pieterjan Bartels   	        		       *
  *                        (C) 2011 Dominick Vanthienen                         *
  *                        (C) 2010 Ruben Smits                                 *
  *                    dominick.vanthienen@mech.kuleuven.be,                    *
- *                        ruben.smits@mech.kuleuven.be                         *
  *                    Department of Mechanical Engineering,                    *
  *                   Katholieke Universiteit Leuven, Belgium.                  *
  *                   http://www.orocos.org/itasc                               *
@@ -761,9 +761,8 @@ bool Scene::addSolver(const string& PeerName) {
 		//Create a SolverStruct
 		the_solverp = new SolverStruct(solverp, true);
 	}
-	Attribute<unsigned int> iep = peer->provides()->getAttribute("inEqualityProvisions");
-	if(iep.get() == 0) the_solverp->inequalityProvisions = false;
-	else the_solverp->inequalityProvisions = true;
+	Attribute<bool> iep = peer->provides()->getAttribute("inEqualityProvisions");
+	the_solverp->inequalityProvisions = iep.get();
 
 	if (the_solverp->priorityProvisions)
 	{	

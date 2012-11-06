@@ -61,25 +61,28 @@ protected:
 
 	unsigned int nc;
 	unsigned int nq;
-	unsigned int inequalityProvisions;
+	bool inequalityProvisions;
 
 	virtual bool solve()=0;
 
 public:
-	Solver(const std::string& name, unsigned int ineq) :
-		TaskContext(name, Stopped), inequalityProvisions(ineq), A_port("A"), Wy_port("Wy"), Wq_port("Wq"),
-				ydot_port("ydot"), ydot_max_port("ydot_max"), inEqualities("inequalities"), qdot_port("qdot")
+	Solver(const std::string& name, bool ineq) :
+		TaskContext(name, Stopped), 
+        inequalityProvisions(ineq)
 	{
-		this->ports()->addPort(A_port);
-		this->ports()->addPort(Wy_port);
-		this->ports()->addPort(Wq_port);
-		this->ports()->addPort(ydot_port);
-		this->ports()->addPort(ydot_max_port);
-		this->ports()->addPort(inEqualities);
-		this->ports()->addPort(qdot_port);
-
+		this->ports()->addPort("A",A_port);
+		this->ports()->addPort("Wy",Wy_port);
+		this->ports()->addPort("Wq",Wq_port).doc("weights on robot joints");
+		this->ports()->addPort("ydot",ydot_port);
+		this->ports()->addPort("ydot_max",ydot_max_port);
+		this->ports()->addPort("inequalities",inEqualities);
+		this->ports()->addPort("qdot",qdot_port).doc("desired robot joint velocities");
+        
+        ///true=solver can handle inequalities, false=solver can't handle inequalities
 		this->provides()->addAttribute("inEqualityProvisions", inequalityProvisions);
+        ///number of constraints
 		this->provides()->addAttribute("nc",nc);
+        ///number of joints
 		this->provides()->addAttribute("nq",nq);
 
 		this->addOperation("solve", &Solver::solve, this, RTT::ClientThread).doc(
