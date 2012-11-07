@@ -51,15 +51,15 @@ namespace iTaSC {
 
 class Solver: public RTT::TaskContext {
 protected:
-	RTT::InputPort<Eigen::MatrixXd> A_port;
-	RTT::InputPort<Eigen::MatrixXd> Wy_port;
+	//RTT::InputPort<Eigen::MatrixXd> A_port;
+	//RTT::InputPort<Eigen::MatrixXd> Wy_port;
+	//RTT::InputPort<Eigen::VectorXd> ydot_port;
+	//RTT::InputPort<Eigen::VectorXd> ydot_max_port;
+	//RTT::InputPort<Eigen::VectorXd> inEqualities;
 	RTT::InputPort<Eigen::MatrixXd> Wq_port;
-	RTT::InputPort<Eigen::VectorXd> ydot_port;
-	RTT::InputPort<Eigen::VectorXd> ydot_max_port;
-	RTT::InputPort<Eigen::VectorXd> inEqualities;
 	RTT::OutputPort<Eigen::VectorXd> qdot_port;
 
-	unsigned int nc;
+	//unsigned int nc;
 	unsigned int nq;
 	bool inequalityProvisions;
 
@@ -70,18 +70,18 @@ public:
 		TaskContext(name, Stopped), 
         inequalityProvisions(ineq)
 	{
-		this->ports()->addPort("A",A_port);
-		this->ports()->addPort("Wy",Wy_port);
+		//this->ports()->addPort("A",A_port)i.doc("generalized jacobian");
+		//this->ports()->addPort("Wy",Wy_port).doc("weights on constraints/tasks");
+		//this->ports()->addPort("ydot",ydot_port).doc("if equality constraints: desired task velocities, if inequality constraints: desired lower bound on task velocities");
+		//this->ports()->addPort("ydot_max",ydot_max_port).doc("if inequality constraints: desred higher bound on task velocities");
+		//this->ports()->addPort("inequalities",inEqualities).doc("0=equality constraint, 1=inequality constraint");
 		this->ports()->addPort("Wq",Wq_port).doc("weights on robot joints");
-		this->ports()->addPort("ydot",ydot_port);
-		this->ports()->addPort("ydot_max",ydot_max_port);
-		this->ports()->addPort("inequalities",inEqualities);
 		this->ports()->addPort("qdot",qdot_port).doc("desired robot joint velocities");
         
         ///true=solver can handle inequalities, false=solver can't handle inequalities
 		this->provides()->addAttribute("inEqualityProvisions", inequalityProvisions);
         ///number of constraints
-		this->provides()->addAttribute("nc",nc);
+		//this->provides()->addAttribute("nc",nc);
         ///number of joints
 		this->provides()->addAttribute("nq",nq);
 

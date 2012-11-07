@@ -350,12 +350,12 @@ private:
 	//this is a struct containing two extra ports, in case inequality constraints are used. One port is for the maximum of the interval, the other one is 		for a vector containing booleans. for the minimum of the interval, the ydot_port of the superclass is used.
 	public: 
 		///Input: modified constraint, the maximum level (at velocity level)
-		RTT::InputPort<KDL::JntArray> ydotmax_port;
+		RTT::InputPort<KDL::JntArray> ydot_max_port;
 		KDL::JntArray y_max_local;
 		
 		ConstraintControllerInequalityStruct(TaskContext* peer_in, ObjectFrame* objectFrame1_in, Robot* robot1_in, ObjectFrame* objectFrame2_in, Robot* robot2_in, VirtualLink* constrainedLink_in, const int constrainedInstanceType_in, unsigned int nc_in, unsigned int start_index_in) :
 			ConstraintControllerStruct(peer_in, objectFrame1_in, robot1_in, objectFrame2_in, robot2_in, constrainedLink_in, constrainedInstanceType_in, nc_in, start_index_in),
-			ydotmax_port(peer->getName() + "_ydotmax"),
+			ydot_max_port(peer->getName() + "_ydot_max"),
 			y_max_local(nc){
 		}
 	};
@@ -393,8 +393,8 @@ private:
 		RTT::OutputPort<Eigen::MatrixXd> A_port;
 		RTT::OutputPort<Eigen::MatrixXd> Wy_port;
 		RTT::OutputPort<Eigen::VectorXd> ydot_port;
-		RTT::OutputPort<Eigen::VectorXd> ymax_port; //only necessary if the constraintController has inequality provisions
-		RTT::OutputPort<Eigen::VectorXd> inequality_port;//only necessary if the constraintcontroller has inequality provisions
+		RTT::OutputPort<Eigen::VectorXd> ydot_max_port; //only necessary if the constraintController has inequality provisions
+		RTT::OutputPort<Eigen::VectorXd> inequalities_port;//only necessary if the constraintcontroller has inequality provisions
 
 		Eigen::MatrixXd A_priority, Wy_priority, tmpCfJf_priority, CfJfinvJq_priority;
 		Eigen::VectorXd ydot_priority;
