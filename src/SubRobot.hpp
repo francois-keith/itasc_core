@@ -1,14 +1,14 @@
 /*******************************************************************************
  *                 This file is part of the iTaSC project                      *
- *                        						       *
- *			  (C) 2012 Pieterjan Bartels   			       *
+ *                        						                               *
+ *			              (C) 2012 Pieterjan Bartels   			               *
  *                        (C) 2011 Dominick Vanthienen                         *
  *                        (C) 2010 Ruben Smits                                 *
  *                    dominick.vanthienen@mech.kuleuven.be,                    *
  *                        ruben.smits@mech.kuleuven.be                         *
  *                    Department of Mechanical Engineering,                    *
  *                   Katholieke Universiteit Leuven, Belgium.                  *
- *                   http://www.orocos.org/itasc                               *
+ *                        http://www.orocos.org/itasc                          *
  *                                                                             *
  *       You may redistribute this software and/or modify it under either the  *
  *       terms of the GNU Lesser General Public License version 2.1 (LGPLv2.1  *
@@ -113,7 +113,6 @@ protected:
 	unsigned int nq;
 
 
-//object frames
 struct ObjectFrame{
 public:
 	std::string objectFrameName;
@@ -121,7 +120,7 @@ public:
 
 	///Output Pose_<segment name>_base
 	RTT::OutputPort<KDL::Frame> T_b_e_port;
-	//jacobian of <segment frame> wrt root
+	///jacobian of <segment frame> wrt root
 	RTT::OutputPort<KDL::Jacobian> Jq_port;
 	
 	//forward kinematics solver
@@ -143,14 +142,20 @@ public:
 	std::vector<unsigned int> q_indices;
 	//names of the joint belonging to this chain 
 	std::vector<std::string> jnt_names;
-	//RelJacobian
+	///Jacobian with reference point ee
 	RTT::OutputPort<KDL::Jacobian> Jq_refpee_port;
-	//joints of chain from root to <segment_frame>
+	///joints of chain from root to <segment_frame>
 	RTT::OutputPort<KDL::JntArray> q_port;
-	//names of the joint of this chain
+	///names of the joint of this chain, in the same order as on the q_port
 	RTT::OutputPort<std::vector<std::string> > jnt_names_port;
 	
-	//constructor
+    ///object frames: frames on the robot or object that will be used to define tasks on
+    /**
+    * \param segmentName name of the object frame 
+    * \param segmentChain chain from the base to this object frame
+    * \param q_indices_in mapping of the joints of the full robot tree, to the joints of the chain from the base to this object frame
+    * \param jnt_names_in names of the joints of the chain from the base to this object frame
+    */
 	ObjectFrame( const std::string& segmentName, KDL::Chain segmentChain, std::vector<unsigned int> q_indices_in, std::vector<std::string> jnt_names_in):
 		objectFrameName(segmentName),
 		jnt_names(jnt_names_in),

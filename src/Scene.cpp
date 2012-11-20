@@ -234,14 +234,56 @@ bool Scene::addRobot(const string& PeerName, const Frame& T_w_b) {
 
 	//Connect the ports of the Scene to the ports of the robot
 	bool connected = true;
+    RTT::base::PortInterface* portPointer;
+
 	this->ports()->addPort(robot->qdot_port);
-	connected &= robot->qdot_port.connectTo(robotp->ports()->getPort("qdot"));
+    portPointer = robotp->ports()->getPort("qdot");
+    if(portPointer == 0){
+        log(Error) << "Could not find port with the name qdot" << endlog();
+		delete robot;
+		robots.erase(PeerName);
+		return false;
+    }else{
+	    connected &= robot->qdot_port.connectTo(portPointer);
+    }
+    portPointer = 0;
+
 	this->ports()->addPort(robot->q_port);
-	connected &= robot->q_port.connectTo(robotp->ports()->getPort("q"));
+    portPointer = robotp->ports()->getPort("q");
+    if(portPointer == 0){
+        log(Error) << "Could not find port with the name q" << endlog();
+		delete robot;
+		robots.erase(PeerName);
+		return false;
+    }else{
+	    connected &= robot->q_port.connectTo(portPointer);
+    }
+    portPointer = 0;
+
 	this->ports()->addPort(robot->Wq_port);
-	connected &= robot->Wq_port.connectTo(robotp->ports()->getPort("Wq"));
+    portPointer = robotp->ports()->getPort("Wq");
+    if(portPointer == 0){
+        log(Error) << "Could not find port with the name Wq" << endlog();
+		delete robot;
+		robots.erase(PeerName);
+		return false;
+    }else{
+	    connected &= robot->Wq_port.connectTo(portPointer);
+    }
+    portPointer = 0;
+
 	this->ports()->addPort(robot->JuXudot_port);
-	connected &= robot->JuXudot_port.connectTo(robotp->ports()->getPort("JuXudot"));
+    portPointer = robotp->ports()->getPort("JuXudot");
+    if(portPointer == 0){
+        log(Error) << "Could not find port with the name JuXudot" << endlog();
+		delete robot;
+		robots.erase(PeerName);
+		return false;
+    }else{
+	    connected &= robot->JuXudot_port.connectTo(portPointer);
+    }
+    portPointer = 0;
+
 	this->ports()->addPort(robot->Wq_global_port);
 	connected &= robot->objectFrames_port.connectTo(objectFramesRobotPortp);
 	this->ports()->addPort(robot->objectFrames_port);
@@ -807,6 +849,7 @@ bool Scene::connectScene2Robots()
 	//iterate over all objectFrames of all robots
 	RobotMap::iterator Rit;
 	ObjectFrameMap::iterator OFit;
+    RTT::base::PortInterface* portPointer;
 	for(Rit = robots.begin(); Rit != robots.end(); Rit++)
 	{
 		Robot* robot = Rit->second;
@@ -817,13 +860,30 @@ bool Scene::connectScene2Robots()
 				ObjectFrame* objectFrame = OFit->second;
 				if(robot->nq != 0)
 				{
-					//give the port at the Scene side a name ...
+					//give the port at the Scene side a name, ...
 					externalName= "Jq_" + objectFrame->segmentName +"_base";
-					//... and connect with it's counterpart at the Robot side
-					connected &= objectFrame->Jq_port.connectTo(robot->peer->ports()->getPort(externalName));
+					//... find it's counterpart at the Robot side,
+                    portPointer = robot->peer->ports()->getPort(externalName);
+                    if(portPointer == 0){
+                        log(Error) << "Could not find a port with the name ' " << externalName << " '" << endlog();
+                        return false;
+                    }else{
+					    //... and connect with it
+					    connected &= objectFrame->Jq_port.connectTo(portPointer);
+                    }
 				}
+				//give the port at the Scene side a name, ...
 				externalName= "Pose_" + objectFrame->segmentName +"_base";
-				connected &= objectFrame->T_b_e_port.connectTo(robot->peer->ports()->getPort(externalName));
+				//... find it's counterpart at the Robot side,
+                portPointer = robot->peer->ports()->getPort(externalName);
+                if(portPointer == 0){
+                    log(Error) << "Could not find a port with the name ' " << externalName << " '" << endlog();
+                    return false;
+                }else{
+				    //... and connect with it
+				    connected &= objectFrame->T_b_e_port.connectTo(robot->peer->ports()->getPort(externalName));
+                    portPointer = 0;
+                }
 			}
 		//}
 	}
@@ -832,12 +892,26 @@ bool Scene::connectScene2Robots()
 //connect the ports of the Scene with the ports of the solver
 bool Scene::connectScene2Solver()
 {	
-
-	
 	Logger::In in(this->getName());
+    RTT::base::PortInterface* portPointer;
 	//ports independent of the fact that there are priority provisions or not
-	if(!Wq_port.connectTo(the_solverp->peer->ports()->getPort("Wq"))){log(Error) << "[[addSolver]] unable to connect to Wq" << endlog();}
-	if(!qdot_port.connectTo(the_solverp->peer->ports()->getPort("qdot"))){log(Error) << "[[addSolver]] unable to connect to qdot" << endlog();}
+    portPointer = the_solverp->peer->ports()->getPort("Wq");
+    if(portPointer == 0){
+        log(Error) << "Could not find a port with the name 'Wq'" << endlog();
+        return false;
+    }else{
+	    if(!Wq_port.connectTo(portPointer)){log(Error) << "[[addSolver]] unable to connect to Wq" << endlog();}
+        portPointer = 0;
+    }
+
+    portPointer = the_solverp->peer->ports()->getPort("qdot");
+    if(portPointer == 0){
+        log(Error) << "Could not find a port with the name 'Wq'" << endlog();
+        return false;
+    }else{
+	    if(!qdot_port.connectTo(portPointer)){log(Error) << "[[addSolver]] unable to connect to qdot" << endlog();}
+        portPointer = 0;
+    }
 
 	if((!the_solverp->inequalityProvisions) && inequalitiesPresent) { //the solver doesn't have inequalityProvisions, but there are inequalities present
 		log(Error) << "[[ConnectScene2Solver] error: Scene has inequalities, but solver can't handle inequalities" << endlog();
@@ -890,23 +964,64 @@ bool Scene::connectScene2Solver()
 	} else
 	{
 		//give the port at the Scene side a name
-		this->ports()->addPort("A_1", priorities[0]->A_port).doc(
-				"Generalized Jacobian with priority of the index");
-		this->ports()->addPort("Wy_1", priorities[0]->Wy_port).doc(
-				"Output weight matrix with priority of the index");
-		this->ports()->addPort("ydot_1", priorities[0]->ydot_port).doc(
-				"Desired output velocity with priority of the index");
+	   	this->ports()->addPort("A_1", priorities[0]->A_port).doc(
+	   			"Generalized Jacobian with priority of the index");
+	   	this->ports()->addPort("Wy_1", priorities[0]->Wy_port).doc(
+	   			"Output weight matrix with priority of the index");
+	   	this->ports()->addPort("ydot_1", priorities[0]->ydot_port).doc(
+	   			"Desired output velocity with priority of the index");
+
 		//connect with it's counterpart at the Solver side
-		priorities[0]->A_port.connectTo(the_solverp->peer->ports()->getPort("A"));
-		priorities[0]->Wy_port.connectTo(the_solverp->peer->ports()->getPort("Wy"));
-		priorities[0]->ydot_port.connectTo(the_solverp->peer->ports()->getPort("ydot"));
+        portPointer = the_solverp->peer->ports()->getPort("A");
+        if(portPointer == 0){
+            log(Error) << "Could not find a port with the name 'A'" << endlog();
+            return false;
+        }else{
+		    priorities[0]->A_port.connectTo(portPointer);
+            portPointer = 0;
+        }
+
+        portPointer = the_solverp->peer->ports()->getPort("Wy");
+        if(portPointer == 0){
+            log(Error) << "Could not find a port with the name 'Wy'" << endlog();
+            return false;
+        }else{
+		    priorities[0]->Wy_port.connectTo(portPointer);
+            portPointer = 0;
+        }
+
+        portPointer = the_solverp->peer->ports()->getPort("ydot");
+        if(portPointer == 0){
+            log(Error) << "Could not find a port with the name 'ydot'" << endlog();
+            return false;
+        }else{
+		    priorities[0]->ydot_port.connectTo(portPointer);
+            portPointer = 0;
+        }
+
 		if(inequalitiesPresent){
 			this->ports()->addPort("ydot_max_1", priorities[0]->ydot_max_port).doc(
 					"Desired maximum output velocity with priority of the index, in case of equality constraints");
 			this->ports()->addPort("inequalities_1", priorities[0]->inequalities_port).doc(
 					"port sending out information about whether a certain constraint is an inequality");
-			priorities[0]->inequalities_port.connectTo(the_solverp->peer->ports()->getPort("inequalities"));
-			priorities[0]->ydot_max_port.connectTo(the_solverp->peer->ports()->getPort("ydot_max"));
+
+            portPointer = the_solverp->peer->ports()->getPort("inequalities");
+            if(portPointer == 0){
+                log(Error) << "Could not find a port with the name 'inequalities'" << endlog();
+                return false;
+            }else{
+		    	priorities[0]->inequalities_port.connectTo(portPointer);
+                portPointer = 0;
+            }
+
+            portPointer = the_solverp->peer->ports()->getPort("ydot_max");
+            if(portPointer == 0){
+                log(Error) << "Could not find a port with the name 'ydot_max'" << endlog();
+                return false;
+            }else{
+		    	priorities[0]->ydot_max_port.connectTo(portPointer);
+                portPointer = 0;
+            }
 		}
 	}
 	return true;
