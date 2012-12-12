@@ -120,7 +120,7 @@ public:
 		this->provides()->addProperty("W", Wy_prop).doc(
 					"diagonal elements of weighting matrix (do not fill with negative values)");
 		//ATTRIBUTES
-		this->provides()->addProperty("nc", nc);
+		this->provides()->addProperty("nc", nc).doc("Number of constraints");
 
         this->addOperation("initialize", &ConstraintController::initialize, this)
             .doc("Initialize "+this->getName());
