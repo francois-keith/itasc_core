@@ -59,7 +59,7 @@ function configureHook()
     ROScommonEventInPort = rtt.InputPort("/std_msgs/String", "ros_common_events_in", "port to receive common events towards itasc and application level, through a ROS topic")
     tc:addPort(ROScommonEventInPort)
     ROSpriorityEventInPort = rtt.InputPort("/std_msgs/String", "ros_priority_events_in", "port to receive priority events towards itasc and application level, through a ROS topic")
-    tc:addPort(ROSpriorityEventInPort)
+    tc:addEventPort(ROSpriorityEventInPort)
 
     -- output ports
     -- should be created and connected on the fly depending on the application
