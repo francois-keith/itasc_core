@@ -47,6 +47,9 @@ tc=rtt.getTC()
 local common_events_in, priority_events_in
 local timer_id_in_fs
 
+trajectoryGeneratorTable = {}
+driverTable = {}
+
 function configureHook()  
 	-- Peer table (to enable smaller code to request operations)
 	-- Mappeers does an in dept search (also looks for peers of peers...) 
@@ -62,12 +65,16 @@ function configureHook()
     tc:addProperty(application_fsm_package_prop)
 	application_fsm_prop=rtt.Property("string", "application_fsm", "path and name to the FSM file of the application, starting from the package (start with a slash), if any")
 	tc:addProperty(application_fsm_prop)
+    -- tables
+    trajectoryGeneratorTableProp=rtt.Property("string[]", "trajectoryGeneratorTable", "Table of trajectory generator names")
+    tc:addProperty(trajectoryGeneratorTableProp)
+    driverTableProp=rtt.Property("string[]", "driverTable", "Table of driver names")
+    tc:addProperty(driverTableProp)
 
     -- fill in standard values for the properties (this will cause it to work as in previous versions)
     application_timer_id:set(1)
     application_fsm_package_prop:set("")
 	application_fsm_prop:set(rttros.find_rospack("itasc_core") .. "/scripts/reduced_application_fsm.lua")
-	
     
 	-- INPUT PORTS 
 
@@ -115,6 +122,21 @@ end
 
 function startHook()
     print("[application_supervisor.lua] starting") 
+    if not trajectoryGeneratorTableProp:get() then
+      rtt.logl("Error","No trajectoryGeneratorTable property set!")
+    end
+    local rttTrajectoryGeneratorTable = trajectoryGeneratorTableProp:get()
+    if not driverTableProp:get() then
+      rtt.logl("Error","No driverTable property set!")
+    end
+    local rttDriverTable = driverTableProp:get()
+    -- rtt tables start from 0, lua tables from 1!
+    for i=0,rttTrajectoryGeneratorTable.size-1 do
+      trajectortyGeneratorTable[#trajectoryGeneratorTable+1] = rttTrajectoryGeneratorTable[i]
+    end
+    for i=0,rttDriverTable.size-1 do
+      driverTable[#driverTable+1] = rttDriverTable[i]
+    end
     -- getting the file locations 
     if(application_fsm_package_prop:get()=="")
     then
@@ -161,35 +183,77 @@ function updateHook()
 end
 
 function cleanupHook()
-	-- cleanup the created ports.
-	tc:removePort(common_events_in:info().name)
-	tc:removePort(priority_events_in:info().name)
-	tc:removePort(priority_events_out:info().name)
-	-- cleanup created variables
-	common_events_in:delete()
-	priority_events_in:delete()
-	priority_events_out:delete()
-	-- cleanup created properties
-	tc:removeProperty("application_timer_id")
+    rttlib.tc_cleanup()
 end
 
 -- CONFIGURE
 --- Function containing RTT specific info to configure TrajectoryGenerators
 function configureTrajectoryGenerators()
-	-- ADD HERE OPERATION CALLS TO CONFIGURE TRAJECTORY GENERATORS 
-    --if ApplicationSupPeertable.nameOfYourTrajectory_generator:configure() then print("   nameOfYourTrajectory_generator configured") else raise_common_event("e_emergency") end
+    for i=1,#trajectoryGeneratorTable do
+      if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:configure() then
+        rtt.logl("Error","unable to configure "..trajectoryGeneratorTable[i])
+        raise_common_event("e_emergency") 
+      end
+    end
+end
+
+-- configure drivers
+function configureDrivers()
+    for i=1,#driverTable do
+      if ApplicationSupPeertable[driverTable[i]]:configure() then
+        rtt.logl("Error","unable to configure "..driverTable[i])
+        raise_common_event("e_emergency") 
+      end
+    end
 end
 
 -- START
 --- Function containing RTT specific info to start TrajectoryGenerators
 function startTrajectoryGenerators()
-    -- ADD OPERATION CALLS
+    for i=1,#trajectoryGeneratorTable do
+      if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:getState()=='Running' then
+        if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:start() then
+          rtt.logl("Error","unable to start "..trajectoryGeneratorTable[i])
+          raise_common_event("e_emergency") 
+        end
+      end
+    end
+end
+
+-- start drivers
+function startDrivers()
+    for i=1,#driverTable do
+      if ApplicationSupPeertable[driverTable[i]]:start() then
+        rtt.logl("Error","unable to start "..driverTable[i])
+        raise_common_event("e_emergency") 
+      end
+    end
 end
 
 --STOP
 --- Function containing RTT specific info to stop TrajectoryGenerators
 function stopTrajectoryGenerators()
-    -- ADD OPERATION CALLS
+    for i=1,#trajectoryGeneratorTable do
+      if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:getState()=='Stopped' then
+        if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:stop() then
+          rtt.logl("Error","unable to stop "..trajectoryGeneratorTable[i])
+          raise_common_event("e_emergency") 
+        end
+      end
+    end
 end
 
---INSERT APPLICATION SPECIFIC FUNCTIONS HERE
+-- stop drivers
+function stopDrivers()
+    for i=1,#driverTable do
+      if ApplicationSupPeertable[driverTable[i]]:stop() then
+        rtt.logl("Error","unable to stop "..driverTable[i])
+        raise_common_event("e_emergency") 
+      end
+    end
+end
+
+--- Function to kill the application
+function exitApplication(status)
+    os.exit(status)
+end

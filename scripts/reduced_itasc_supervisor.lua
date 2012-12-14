@@ -251,9 +251,31 @@ end
 
 function createOperationTables()
     for i,v in pairs(robotTable) do
+      if peertable[v]:hasOperation("updateRobotState") then
 	  updateRobotStateTable[#updateRobotStateTable+1] = peertable[v]:getOperation("updateRobotState")
+      else
+        rtt.logl("Error",v.." has no required operation updateRobotState")
+		raise_common_event("e_emergency") 
+      end
 	  -- create table with sendToRobot operations
+      if peertable[v]:hasOperation("sendToRobot") then
 	  sendToRobotTable[#sendToRobotTable+1] = peertable[v]:getOperation("sendToRobot")
+      else
+        rtt.logl("Error",v.." has no required operation sendToRobot")
+		raise_common_event("e_emergency") 
+      end
+      if peertable[v]:hasOperation("unlockRobotAxes") then
+        unlockRobotTable[#unlockRobotTable+1] = peertable[v]:getOperation("unlockRobotAxes")
+      else
+        rtt.logl("Error",v.." has no required operation unlockRobotAxes")
+		raise_common_event("e_emergency") 
+      end
+      if peertable[v]:hasOperation("lockRobotAxes") then
+        lockRobotTable[#lockRobotTable+1] = peertable[v]:getOperation("lockRobotAxes")
+      else
+        rtt.logl("Error",v.." has no required operation lockRobotAxes")
+		raise_common_event("e_emergency") 
+      end
     end
 end
 
@@ -301,11 +323,6 @@ function configureScene()
 	if peertable[Scene]:configure() then rtt.logl("Info","   Scene configured") else raise_common_event("e_emergency") end
 end
 
---- Function containing RTT specific info to configure the Reporter
-function configureReporter()
-	if peertable.Reporter:configure() then rtt.logl("Info","   Reporter configured") else raise_common_event("e_emergency") end
-end
-
 --- Function containing RTT specific info to stop all itasc level components
 function startRobots()
 	for i=1,#robotTable do
@@ -341,5 +358,27 @@ end
 function sendToRobot()
 	for k, opSTR in ipairs(sendToRobotTable) do
 		opSTR()
+	end
+end
+
+--unlock axes
+--- Function containing RTT specific info
+function unlockRobotAxes()
+	for k, unlockRob in ipairs(unlockRobotTable) do
+		if not unlockRob() then
+          rtt.logl("Error","unable to unlock the axes of "..robotTable[k])
+          raise_common_event("e_emergency") 
+        end
+	end
+end
+
+--lock axes
+--- Function containing RTT specific info
+function lockRobotAxes()
+	for k, lockRob in ipairs(lockRobotTable) do
+		if not lockRob() then
+          rtt.logl("Error","unable to lock the axes of "..robotTable[k])
+          raise_common_event("e_emergency") 
+        end
 	end
 end

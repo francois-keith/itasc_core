@@ -45,6 +45,7 @@ NONemergency = rfsm.composite_state{
 		entry=function()
 			print("=>ApplicationFSM->ConfiguringApplication state entry")
 			configureTrajectoryGenerators()
+            configureDrivers()
 			raise_trigger_event("e_configITASC")
 		end,
 
@@ -60,6 +61,7 @@ NONemergency = rfsm.composite_state{
 	StartingApplication = rfsm.simple_state{
 		entry=function()
 			print("=>ApplicationFSM->StartingApplication state")
+            startDrivers()
 			raise_trigger_event("e_startITASC")
 		end,
 	},
@@ -91,7 +93,9 @@ NONemergency = rfsm.composite_state{
 	StoppedApplication = rfsm.simple_state{
 		entry=function()
 			print("=>ApplicationFSM->StoppedApplication state")
+            stopDrivers()
 			raise_common_event("e_ApplicationStopped")
+            exitApplication(0)
 		end,
 	},
 	

@@ -59,31 +59,23 @@ NONemergency = rfsm.composite_state{
 	PreOperational = rfsm.simple_state{
 	},
 
-	ConfiguringITASC = rfsm.composite_state{	
-		ConfiguringVariationalPart = rfsm.load(itasc_configuration_file),
-		ConfiguringFixedPart = rfsm.simple_state{
-			entry=function(fsm)
-				print("=>iTaSCFSM=>ConfiguringITaSC->ConfiguringFixedPart state entry")
-				-- broadcast object frames
-				broadcastObjectFrames()
-				-- configure solvers
-				configureSolvers()
-				-- create connection of the Scene
-				connectScene2Solver()
-				-- configure object frames (MUST BE after object frames are broadcasted)
-				configureObjectFrames()
-				-- create connection between Robots and Scene (MUST BE after robots are configured)
-				connectScene2Robots()
-				-- configure Scene
-				configureScene()
-				-- configure Reporter
-				-- configureReporter()
-				raise_trigger_event("e_configTasks")
-			end,
-		},
-		
-		rfsm.transition { src='initial', tgt='ConfiguringVariationalPart' },
-		rfsm.transition { src='ConfiguringVariationalPart', tgt='ConfiguringFixedPart', events={'e_done'} },
+	ConfiguringITASC = rfsm.simple_state{	
+	    entry=function(fsm)
+	    	print("=>iTaSCFSM=>ConfiguringITaSC->ConfiguringFixedPart state entry")
+	    	-- broadcast object frames
+	    	broadcastObjectFrames()
+	    	-- configure solvers
+	    	configureSolvers()
+	    	-- create connection of the Scene
+	    	connectScene2Solver()
+	    	-- configure object frames (MUST BE after object frames are broadcasted)
+	    	configureObjectFrames()
+	    	-- create connection between Robots and Scene (MUST BE after robots are configured)
+	    	connectScene2Robots()
+	    	-- configure Scene
+	    	configureScene()
+	    	raise_trigger_event("e_configTasks")
+	    end
 	},
 
 	ConfiguredITASC = rfsm.simple_state{
@@ -104,6 +96,7 @@ NONemergency = rfsm.composite_state{
 	StartedITASC = rfsm.simple_state{
 		entry=function()
 			print("=>iTaSCFSM->StartedITASC state entry")
+            unlockRobotAxes()
 			raise_common_event("e_ITASCStarted")
 		end,
 	},
@@ -119,6 +112,7 @@ NONemergency = rfsm.composite_state{
 		entry = function ()
 			print("=>iTaSCFSM->StoppingITASC state entry")
 			stopAllComponents()
+            lockRobotAxes()
 			raise_trigger_event("e_stopTasks")
 		end,
 	},
