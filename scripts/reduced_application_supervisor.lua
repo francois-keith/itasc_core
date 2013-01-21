@@ -47,7 +47,7 @@ tc=rtt.getTC()
 local common_events_in, priority_events_in
 local timer_id_in_fs
 
-trajectoryGeneratorTable = {}
+setpointGeneratorTable = {}
 driverTable = {}
 
 function configureHook()  
@@ -66,8 +66,8 @@ function configureHook()
 	application_fsm_prop=rtt.Property("string", "application_fsm", "path and name to the FSM file of the application, starting from the package (start with a slash), if any")
 	tc:addProperty(application_fsm_prop)
     -- tables
-    trajectoryGeneratorTableProp=rtt.Property("string[]", "trajectoryGeneratorTable", "Table of trajectory generator names")
-    tc:addProperty(trajectoryGeneratorTableProp)
+    setpointGeneratorTableProp=rtt.Property("string[]", "setpointGeneratorTable", "Table of trajectory generator names")
+    tc:addProperty(setpointGeneratorTableProp)
     driverTableProp=rtt.Property("string[]", "driverTable", "Table of driver names")
     tc:addProperty(driverTableProp)
 
@@ -122,17 +122,17 @@ end
 
 function startHook()
     print("[application_supervisor.lua] starting") 
-    if not trajectoryGeneratorTableProp:get() then
-      rtt.logl("Error","No trajectoryGeneratorTable property set!")
+    if not setpointGeneratorTableProp:get() then
+      rtt.logl("Error","No setpointGeneratorTable property set!")
     end
-    local rttTrajectoryGeneratorTable = trajectoryGeneratorTableProp:get()
+    local rttTrajectoryGeneratorTable = setpointGeneratorTableProp:get()
     if not driverTableProp:get() then
       rtt.logl("Error","No driverTable property set!")
     end
     local rttDriverTable = driverTableProp:get()
     -- rtt tables start from 0, lua tables from 1!
     for i=0,rttTrajectoryGeneratorTable.size-1 do
-      trajectortyGeneratorTable[#trajectoryGeneratorTable+1] = rttTrajectoryGeneratorTable[i]
+      trajectortyGeneratorTable[#setpointGeneratorTable+1] = rttTrajectoryGeneratorTable[i]
     end
     for i=0,rttDriverTable.size-1 do
       driverTable[#driverTable+1] = rttDriverTable[i]
@@ -189,9 +189,9 @@ end
 -- CONFIGURE
 --- Function containing RTT specific info to configure TrajectoryGenerators
 function configureTrajectoryGenerators()
-    for i=1,#trajectoryGeneratorTable do
-      if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:configure() then
-        rtt.logl("Error","unable to configure "..trajectoryGeneratorTable[i])
+    for i=1,#setpointGeneratorTable do
+      if not ApplicationSupPeertable[setpointGeneratorTable[i]]:configure() then
+        rtt.logl("Error","unable to configure "..setpointGeneratorTable[i])
         raise_common_event("e_emergency") 
       end
     end
@@ -210,10 +210,10 @@ end
 -- START
 --- Function containing RTT specific info to start TrajectoryGenerators
 function startTrajectoryGenerators()
-    for i=1,#trajectoryGeneratorTable do
-      if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:getState()=='Running' then
-        if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:start() then
-          rtt.logl("Error","unable to start "..trajectoryGeneratorTable[i])
+    for i=1,#setpointGeneratorTable do
+      if not ApplicationSupPeertable[setpointGeneratorTable[i]]:getState()=='Running' then
+        if not ApplicationSupPeertable[setpointGeneratorTable[i]]:start() then
+          rtt.logl("Error","unable to start "..setpointGeneratorTable[i])
           raise_common_event("e_emergency") 
         end
       end
@@ -233,10 +233,10 @@ end
 --STOP
 --- Function containing RTT specific info to stop TrajectoryGenerators
 function stopTrajectoryGenerators()
-    for i=1,#trajectoryGeneratorTable do
-      if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:getState()=='Stopped' then
-        if not ApplicationSupPeertable[trajectoryGeneratorTable[i]]:stop() then
-          rtt.logl("Error","unable to stop "..trajectoryGeneratorTable[i])
+    for i=1,#setpointGeneratorTable do
+      if not ApplicationSupPeertable[setpointGeneratorTable[i]]:getState()=='Stopped' then
+        if not ApplicationSupPeertable[setpointGeneratorTable[i]]:stop() then
+          rtt.logl("Error","unable to stop "..setpointGeneratorTable[i])
           raise_common_event("e_emergency") 
         end
       end
