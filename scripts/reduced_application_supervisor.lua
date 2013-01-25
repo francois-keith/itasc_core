@@ -132,7 +132,7 @@ function startHook()
     local rttDriverTable = driverTableProp:get()
     -- rtt tables start from 0, lua tables from 1!
     for i=0,rttTrajectoryGeneratorTable.size-1 do
-      trajectortyGeneratorTable[#setpointGeneratorTable+1] = rttTrajectoryGeneratorTable[i]
+      setpointGeneratorTable[#setpointGeneratorTable+1] = rttTrajectoryGeneratorTable[i]
     end
     for i=0,rttDriverTable.size-1 do
       driverTable[#driverTable+1] = rttDriverTable[i]
