@@ -35,6 +35,20 @@
 
 -- ApplicationFSM
 --require("ansicolors")
+function guardMultipleEvents(tr, taskTable, prefix, appendix)
+    local x=false
+    for i=1,#taskTable do
+        local x_temp_name = prefix .. taskTable[i] .. appendix
+        local x_temp = tr.src.emem[x_temp_name]
+        if i>1 then
+            x = x and x_temp and x_temp > 0 
+        else
+            x = x_temp and x_temp > 0 
+        end 
+    end 
+    if x then return true end 
+    return false
+end
 
 return rfsm.composite_state{
 	--dbg = fsmpp.gen_dbgcolor3({["STATE_ENTER"]=true, ["STATE_EXIT"]=true, ["HIBERNATING"]=false, ["EXEC_PATH"]=true, ["EFFECT"]=false, ["DOO"]=false, ["CHECKING"]=false, ["RAISED"]=true},  false,   ansicolors.yellow .. ansicolors.bright ..  "APPLICATIONfsm" ..  ansicolors.reset),
@@ -106,18 +120,14 @@ NONemergency = rfsm.composite_state{
 	rfsm.transition { src='initial', tgt='ConfiguringApplication' },
 	rfsm.transition { src='ConfiguringApplication', tgt='ConfiguredApplication',
 		guard=function (tr)
-			local x = tr.src.emem.e_ITASCConfigured
-			if x and x > 0 then return true end
-			return false
+            return guardMultipleEvents(tr, compositeTable, 'e_', '_configured')
 		end },
 	rfsm.transition { src='ConfiguringApplication', tgt='StoppingApplication', events={ 'e_stop' } },
 	rfsm.transition { src='ConfiguredApplication', tgt='StartingApplication', events={ 'e_done' } },
 	rfsm.transition { src='ConfiguredApplication', tgt='StoppingApplication', events={ 'e_stop' } },
 	rfsm.transition { src='StartingApplication', tgt='StartedApplication',
 		guard=function (tr)
-			local x = tr.src.emem.e_ITASCStarted
-			if x and x > 0 then return true end
-			return false
+            return guardMultipleEvents(tr, compositeTable, 'e_', '_started')
 		end },
 	rfsm.transition { src='StartingApplication', tgt='StoppingApplication', events={ 'e_stop' } },
 	rfsm.transition { src='StartedApplication', tgt='RunningApplication', events={ 'e_done' } },
@@ -125,9 +135,7 @@ NONemergency = rfsm.composite_state{
 	rfsm.transition { src='RunningApplication', tgt='StoppingApplication', events={ 'e_stop' } },
 	rfsm.transition { src='StoppingApplication', tgt='StoppedApplication',
 		guard=function (tr)
-			local x = tr.src.emem.e_ITASCStopped
-			if x and x > 0 then return true end
-			return false
+            return guardMultipleEvents(tr, compositeTable, 'e_', '_stopped')
 		end },
 },
 

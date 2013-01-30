@@ -49,6 +49,10 @@ local timer_id_in_fs
 
 setpointGeneratorTable = {}
 driverTable = {}
+compositeTable = {}
+defaultCompositeTable = rtt.Variable('strings')
+defaultCompositeTable:resize(1)
+defaultCompositeTable:fromtab{"ITASC"}
 
 function configureHook()  
 	-- Peer table (to enable smaller code to request operations)
@@ -70,12 +74,15 @@ function configureHook()
     tc:addProperty(setpointGeneratorTableProp)
     driverTableProp=rtt.Property("string[]", "driverTable", "Table of driver names")
     tc:addProperty(driverTableProp)
+    compositeTableProp=rtt.Property("string[]", "compositeTable", "Table of names of supervisors at the composite/itasc (=application-1) level")
+    tc:addProperty(compositeTableProp)
 
     -- fill in standard values for the properties (this will cause it to work as in previous versions)
     application_timer_id:set(1)
     application_fsm_package_prop:set("")
 	application_fsm_prop:set(rttros.find_rospack("itasc_core") .. "/scripts/reduced_application_fsm.lua")
-    
+    compositeTableProp:set(defaultCompositeTable) 
+
 	-- INPUT PORTS 
 
 	-- Port to receive trigger from a timer
@@ -130,12 +137,16 @@ function startHook()
       rtt.logl("Error","No driverTable property set!")
     end
     local rttDriverTable = driverTableProp:get()
+    local rttCompositeTable = compositeTableProp:get()
     -- rtt tables start from 0, lua tables from 1!
     for i=0,rttTrajectoryGeneratorTable.size-1 do
       setpointGeneratorTable[#setpointGeneratorTable+1] = rttTrajectoryGeneratorTable[i]
     end
     for i=0,rttDriverTable.size-1 do
       driverTable[#driverTable+1] = rttDriverTable[i]
+    end
+    for i=0,rttCompositeTable.size-1 do
+      compositeTable[#compositeTable+1] = rttCompositeTable[i]
     end
     -- getting the file locations 
     if(application_fsm_package_prop:get()=="")

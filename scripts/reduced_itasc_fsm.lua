@@ -81,7 +81,9 @@ NONemergency = rfsm.composite_state{
 	ConfiguredITASC = rfsm.simple_state{
 		entry=function()
 			print("=>iTaSCFSM->ConfiguredITASC state entry")
+            -- sent out two events for event name backward compability
 			raise_common_event("e_ITASCConfigured")
+			raise_common_event("e_ITASC_configured")
 		end,
 	},
 
@@ -98,6 +100,7 @@ NONemergency = rfsm.composite_state{
 			print("=>iTaSCFSM->StartedITASC state entry")
             unlockRobotAxes()
 			raise_common_event("e_ITASCStarted")
+			raise_common_event("e_ITASC_started")
 		end,
 	},
 
@@ -121,6 +124,7 @@ NONemergency = rfsm.composite_state{
 		entry=function()
 			print("=>iTaSCFSM->StoppedITASC state")
 			raise_common_event("e_ITASCStopped")
+			raise_common_event("e_ITASC_stopped")
 		end,
 	},
 
