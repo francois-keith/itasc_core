@@ -160,6 +160,9 @@ function startHook()
 	-- FSM
 	-- load state machine
 	fsm = rfsm.init(rfsm.load(application_fsm_file))
+    --rfsm.pre_step_hook_add(fsm, function(fsm, events)
+    --  if #events > 1 then print("application_supervisor received: "..utils.tab2str(events)) end
+    --end)
 
 	-- get all events from the all input ports
 	fsm.getevents = rfsm_rtt.gen_read_str_events(common_events_in, priority_events_in, trigger_events_in)

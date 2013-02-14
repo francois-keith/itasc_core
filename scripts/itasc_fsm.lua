@@ -138,7 +138,7 @@ NONemergency = rfsm.composite_state{
 	rfsm.transition { src='PreOperational', tgt='ConfiguringITASC', events={'e_configITASC'}, effect=function () print("=>iTaSCFSM->transition to Configuring ITASC state") end },
 	rfsm.transition { src='ConfiguringITASC', tgt='ConfiguredITASC',
 					guard = function (tr)
-						return guardMultipleEvents(tr, taskTable, 'e_', 'Configured')
+						return guardMultipleEvents(tr, compositeTable, 'e_', 'Configured')
 					end
 		 			},
 	rfsm.transition { src='ConfiguringITASC', tgt='StoppingITASC', events={'e_stopITASC'} },
@@ -146,7 +146,7 @@ NONemergency = rfsm.composite_state{
 	rfsm.transition { src='ConfiguredITASC', tgt='StoppingITASC', events={'e_stopITASC'} },
 	rfsm.transition { src='StartingITASC', tgt='StartedITASC',
 					guard = function (tr)
-						return guardMultipleEvents(tr, taskTable, 'e_', 'Started')
+						return guardMultipleEvents(tr, compositeTable, 'e_', 'Started')
 					end	
 					},
 	rfsm.transition { src='StartingITASC', tgt='StoppingITASC', events={ 'e_stopITASC' } },
@@ -155,7 +155,7 @@ NONemergency = rfsm.composite_state{
 	rfsm.transition { src='RunningITASC', tgt='StoppingITASC', events={ 'e_stopITASC' } },
 	rfsm.transition { src='StoppingITASC', tgt='StoppedITASC',
 					guard = function (tr)
-						return guardMultipleEvents(tr, taskTable, 'e_', 'Stopped')
+						return guardMultipleEvents(tr, compositeTable, 'e_', 'Stopped')
 					end
 					},
 },
