@@ -105,10 +105,35 @@ NONemergency = rfsm.composite_state{
 	},
 
 	-- sequential AND state
-	RunningITASC = rfsm_ext.seqand{
-		order = {'CoordinatingITASC','CompositeTaskFSMa'},
-		CoordinatingITASC = rfsm.init(rfsm.load(running_itasc_coordination_file)),
-		CompositeTaskFSMa = rfsm.init(rfsm.load(composite_task_fsm_file)),
+	RunningITASC = rfsm.composite_state {
+	   Initializing =rfsm.simple_state{
+	      entry=function(fsm)
+		       --print("=>iTaSCFSM=>Running=>CompositeTaskFSM->Initializing State")
+		    end,
+	      doo=function()
+		     while true do
+			    raise_trigger_event("e_runTasks")
+			    rfsm.yield()
+		     end
+		  end,
+	      exit=function()
+		      --print("=>iTaSCFSM=>Running=>CompositeTaskFSM->Initialized State")
+		      --print("===Application up and running!===")
+		   end
+	   },
+
+	   Running = rfsm_ext.seqand {
+	      order = {'CoordinatingITASC','CompositeTaskFSMa'},
+	      CoordinatingITASC = rfsm.init(rfsm.load(running_itasc_coordination_file)),
+	      CompositeTaskFSMa = rfsm.init(rfsm.load(composite_task_fsm_file)),
+	   },
+
+	   rfsm.transition { src='initial', tgt='Initializing' },
+	   rfsm.transition { src='Initializing', tgt='Running',
+			     guard = function (tr)
+					return guardMultipleEvents(tr, taskTable, 'e_running', '_coordinationInitialized')
+				     end
+			  },
 	},
 
 	StoppingITASC = rfsm.simple_state{

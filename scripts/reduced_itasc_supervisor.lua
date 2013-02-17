@@ -100,7 +100,7 @@ function configureHook()
     running_itasc_coordination_package_prop:set("")
 	itasc_fsm_prop:set(rttros.find_rospack("itasc_core") .. "/scripts/reduced_itasc_fsm.lua")
     running_itasc_coordination_prop:set(rttros.find_rospack("itasc_core") .."/scripts/running_itasc_coordination.lua")
-    composite_task_fsm_prop:set(rttros.find_rospack("itasc_core") .."/scripts/composite_task_fsm.lua")
+    composite_task_fsm_prop:set(rttros.find_rospack("itasc_core") .."/scripts/reduced_composite_task_fsm.lua")
     sceneProp:set("Scene")
 	
 	-- INPUT PORTS 
