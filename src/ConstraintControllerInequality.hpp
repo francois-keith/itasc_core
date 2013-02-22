@@ -62,8 +62,8 @@ public:
 	{
 		//OUTPUT
 		this->ports()->addPort("ydot_max", ydot_max_port);
-	};
-	virtual ~ConstraintControllerInequality() {};
+	}
+	virtual ~ConstraintControllerInequality() {}
 
 };
 

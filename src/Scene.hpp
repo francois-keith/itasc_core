@@ -74,12 +74,12 @@ class Scene: public RTT::TaskContext {
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	Scene(const std::string& name);
-	~Scene() {};
+	~Scene() {}
 
 	virtual bool configureHook();
 	virtual bool startHook() { return true;	}
-	virtual void updateHook(){};
-	virtual void stopHook() {};
+	virtual void updateHook(){}
+	virtual void stopHook() {}
 	virtual void cleanupHook();
 
 	bool orderPriorities();

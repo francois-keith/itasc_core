@@ -50,7 +50,6 @@
 #include <kdl/utilities/svd_eigen_HH.hpp>
 
 ORO_CREATE_COMPONENT( iTaSC::Scene )
-;
 
 namespace iTaSC {
 
@@ -73,8 +72,9 @@ Scene::Scene(const string& name) :
 	t1(Twist::Zero()),
 	t2(Twist::Zero()),
 	Jq_qdot(Twist::Zero()),
-	prioritiesOrdered(false),
-	inequalitiesPresent(false)
+	Jq_qdot_w(Twist::Zero()),
+	inequalitiesPresent(false),
+	prioritiesOrdered(false)
 {
 	this->properties()->addProperty("iTaSC_configuration", iTaSC_configuration).doc(
 			"file containing the configuration of robots and virtual linkages");

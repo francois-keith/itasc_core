@@ -129,8 +129,8 @@ public:
         this->addOperation("updateController", &ConstraintController::updateController, this)
             .doc("updateController of "+this->getName());
 
-	};
-	virtual ~ConstraintController() {};
+	}
+	virtual ~ConstraintController() {}
 };
 
 }//end of namespace
