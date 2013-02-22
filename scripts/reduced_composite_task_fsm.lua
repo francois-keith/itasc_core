@@ -46,7 +46,9 @@ return state {
         
     AllTasksActive = state{
         entry = function()
+            print("--- ACTIVATE ALL TASKS AND MOVE TO ALL GOALS ---")
             raise_common_event('e_all_tasks_activate')
+            raise_common_event('e_all_trajectory_generators_moveToGoal')
         end,
     },
 

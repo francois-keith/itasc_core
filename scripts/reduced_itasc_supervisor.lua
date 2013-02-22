@@ -51,6 +51,7 @@ robotTable     = {}
 solverTable    = {}
 updateRobotStateTable = {}
 sendToRobotTable      = {}
+unlockRobotTable      = {}
 
 local Scene
 local prev_timertrigger_time={}
@@ -170,14 +171,6 @@ function startHook()
     for i=0,rttSolverTable.size-1 do
       solverTable[#solverTable+1] = rttSolverTable[i]
     end
-    -- getting the file locations 
-    if(itasc_configuration_package_prop:get()=="")
-    then
-        rtt.logl("Warning"," No itasc_configuration_package specified, will look for configuration file on location specified by itasc_configuration property")    
-        itasc_configuration_file = itasc_configuration_prop:get()
-    else
-        itasc_configuration_file = rttros.find_rospack(itasc_configuration_package_prop:get()) .. itasc_configuration_prop:get()
-    end
     if(composite_task_fsm_package_prop:get()=="")
     then
         rtt.logl("Warning"," No composite_task_fsm_package specified, will look for fsm file on location specified by composite_task_fsm property")    
@@ -294,6 +287,7 @@ end
 --- Function containing RTT specific info to configure the objectFrames of robots and objects
 function configureObjectFrames()
 	for i=1,#robotTable do
+        rtt.logl("Info","Trying to configure the object frames of "..robotTable[i])
 		if peertable[robotTable[i]]:configureObjectFrames() then
 			rtt.logl("Info","   " .. robotTable[i] .. "-objectframes configured") 
 		else 
@@ -364,12 +358,14 @@ end
 --unlock axes
 --- Function containing RTT specific info
 function unlockRobotAxes()
-	for k, unlockRob in ipairs(unlockRobotTable) do
-		if not unlockRob() then
-          rtt.logl("Error","unable to unlock the axes of "..robotTable[k])
-          raise_common_event("e_emergency") 
-        end
-	end
+    if #unlockRobotTable > 0 then
+	  for k, unlockRob in ipairs(unlockRobotTable) do
+	  	if not unlockRob() then
+            rtt.logl("Error","unable to unlock the axes of "..robotTable[k])
+            raise_common_event("e_emergency") 
+          end
+	  end
+    end
 end
 
 --lock axes
