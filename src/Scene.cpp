@@ -364,13 +364,8 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 	}
 	
 	//determine whether or not the given ConstraintController is an inequality constraint controller
-	bool hasInequalities = false;
-	ConstraintControllerInequality* constraintClassEq = dynamic_cast<ConstraintControllerInequality*> (peer);
-	if (constraintClassEq == NULL) {
-		hasInequalities = false; //the given constraint controller has only equalities
-	}
-	else{
-		hasInequalities = true; //the given ConstraintController is an instance of ConstraintControllerInequality
+	bool hasInequalities = !(constraintClassp->isEqualityConstraint());
+	if ( hasInequalities ) {//the given ConstraintController is an instance of ConstraintControllerInequality
 		inequalitiesPresent = true;
 	}
 
@@ -554,9 +549,6 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 		delete constraintStructp;
 		return false;
 	}
-	else{
-		priorities[PriorityFromBag - 1]->inequalities.insert(InequalityMap::value_type(PeerName, hasInequalities));
-	}
 
 	//put the sameRobot flag in the struct
 	constraintStructp->sameRobot = sameRobot;
@@ -572,7 +564,7 @@ bool Scene::addConstraintController(const string& PeerName, const string& Object
 	if(hasInequalities){
 		this->ports()->addPort(((ConstraintControllerInequalityStruct*) constraintStructp)->ydot_max_port);
 		connected &= ((ConstraintControllerInequalityStruct*) constraintStructp) -> 
-									ydot_max_port.connectTo(constraintClassEq->ports()->getPort("ydot_max"));
+									ydot_max_port.connectTo(constraintClassp->ports()->getPort("ydot_max"));
 	}
 	this->ports()->addPort(constraintStructp->Cf_port);
 	connected &= constraintStructp->Cf_port.connectTo(constraintClassp->ports()->getPort("Cf"));
@@ -1193,7 +1185,7 @@ void Scene::calculateA()
 			priorities[m]->ydot_priority.segment(constraint->start_index, constraint->nc) = constraint->y_dot_local.data;
 
 			if(inequalitiesPresent){//scene has inequalities!
-				bool hasinequalities = (priorities[m]->inequalities.find(constraintp->first))->second;
+				bool hasinequalities = !(constraint->isEqualityConstraint());
 
 				if(hasinequalities){//constraintController has inequalities
 					//therefor we are sure we can cast to CCInequalityStruct a this point.

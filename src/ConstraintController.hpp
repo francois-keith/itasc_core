@@ -131,6 +131,7 @@ public:
 
 	}
 	virtual ~ConstraintController() {}
+	virtual bool isEqualityConstraint() const { return true; }
 };
 
 }//end of namespace

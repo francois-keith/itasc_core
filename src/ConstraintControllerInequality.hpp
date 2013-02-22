@@ -64,7 +64,7 @@ public:
 		this->ports()->addPort("ydot_max", ydot_max_port);
 	}
 	virtual ~ConstraintControllerInequality() {}
-
+	virtual bool isEqualityConstraint() const { return false; }
 };
 
 

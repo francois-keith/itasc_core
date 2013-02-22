@@ -344,6 +344,8 @@ private:
 				Cf_local = Eigen::MatrixXd::Zero(nc, constrainedLink_in->nfc);
 			}
 		}
+
+		virtual bool isEqualityConstraint() const { return true; }
 	};
 
 	struct ConstraintControllerInequalityStruct : ConstraintControllerStruct {
@@ -358,6 +360,7 @@ private:
 			ydot_max_port(peer->getName() + "_ydot_max"),
 			y_max_local(nc){
 		}
+		virtual bool isEqualityConstraint() const { return false; }
 	};
 
 	struct SolverStruct{
@@ -376,7 +379,6 @@ private:
 
 	typedef std::map<std::string, Robot*> RobotMap;
 	typedef std::map<std::string, ConstraintControllerStruct*> ConstraintControllerMap;
-	typedef std::map<std::string, bool> InequalityMap;
 	typedef std::map<std::string, VirtualKinematicChainStruct*> VKCMap;
 
 	RobotMap robots;
@@ -388,7 +390,6 @@ private:
 	{
 	public:
 		ConstraintControllerMap constraints;
-		InequalityMap inequalities;
 		unsigned int nc_priority;
 		RTT::OutputPort<Eigen::MatrixXd> A_port;
 		RTT::OutputPort<Eigen::MatrixXd> Wy_port;
