@@ -394,12 +394,19 @@ private:
 		RTT::OutputPort<Eigen::MatrixXd> Wy_port;
 		RTT::OutputPort<Eigen::VectorXd> ydot_port;
 		RTT::OutputPort<Eigen::VectorXd> ydot_max_port; //only necessary if the constraintController has inequality provisions
-		RTT::OutputPort<Eigen::VectorXd> inequalities_port;//only necessary if the constraintcontroller has inequality provisions
+		RTT::OutputPort< std::vector <unsigned > > inequalities_port;//only necessary if the constraintcontroller has inequality provisions
 
 		Eigen::MatrixXd A_priority, Wy_priority, tmpCfJf_priority, CfJfinvJq_priority;
 		Eigen::VectorXd ydot_priority;
 		Eigen::VectorXd ydotmax_priority;
-		Eigen::VectorXd ydot_inequalities_priority;
+
+		// ydot_Inequalities_works has the same size as ydot.
+		// The meaning of the value used are the following ones.
+		// O: equality constraint: only ydot is taken into account
+		// 1: only lower bound
+		// 2: only upper bound
+		// 3: both bounds
+		std::vector <unsigned > ydot_inequalities_priority;
 
 		Priority() :
 			//initialisations

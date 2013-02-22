@@ -143,9 +143,7 @@ bool Scene::configureHook() {
 		priorities[i]->ydotmax_priority = VectorXd(
 				(int) priorities[i]->nc_priority);
 		priorities[i]->ydotmax_priority.setZero();
-		priorities[i]->ydot_inequalities_priority = VectorXd(
-				(int) priorities[i]->nc_priority);
-		priorities[i]->ydot_inequalities_priority.setZero();
+		priorities[i]->ydot_inequalities_priority.resize(priorities[i]->nc_priority,0);
 		priorities[i]->tmpCfJf_priority = MatrixXd(
 				(int) priorities[i]->nc_priority, 6);
 		priorities[i]->tmpCfJf_priority.setZero();
@@ -1204,16 +1202,17 @@ void Scene::calculateA()
 					priorities[m]->ydotmax_priority.segment(constraint->start_index, constraint->nc) = 
 									((ConstraintControllerInequalityStruct*) constraint)->y_max_local.data;
 					//priorities[m]->ydot_inequalities_priority.segment(constraint->start_index, constraint->nc) = 1;
-					//set inequalities to 1 if there is an inequality
+					//set inequalities to 1 if lower bound eq, 2 for upper, 3 for both.
 					for(unsigned int k = 0; k < constraint -> nc; k++){
-						priorities[m]->ydot_inequalities_priority((constraint->start_index) + k) = 1;
+						priorities[m]->ydot_inequalities_priority[(constraint->start_index) + k] = 3;
 					}
 				}
 				else{//constraintController doesn't have inequalities
 					//put same values on ydot_max as on regular ydot
 					priorities[m]->ydotmax_priority.segment(constraint->start_index, constraint->nc) = constraint->y_dot_local.data;
 					//set corresponding segment of inequalities vector to zero, since it's isn't a constraintcontroller
-					priorities[m]->ydot_inequalities_priority.segment(constraint->start_index, constraint->nc).setZero();
+					for (unsigned i=constraint->start_index; i<constraint->start_index + constraint->nc; ++i)
+						priorities[m]->ydot_inequalities_priority[i] = 0;
 				}
 			}
 			// *** A ***
