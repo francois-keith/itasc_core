@@ -62,6 +62,8 @@ NONemergency = rfsm.composite_state{
 	ConfiguringITASC = rfsm.simple_state{	
 	    entry=function(fsm)
 	    	print("=>iTaSCFSM=>ConfiguringITaSC->ConfiguringFixedPart state entry")
+            -- create tables
+            createOperationTables()
 	    	-- broadcast object frames
 	    	broadcastObjectFrames()
 	    	-- configure solvers
