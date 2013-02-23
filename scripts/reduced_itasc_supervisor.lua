@@ -260,14 +260,14 @@ function createOperationTables()
       if peertable[v]:hasOperation("unlockRobotAxes") then
         unlockRobotTable[#unlockRobotTable+1] = peertable[v]:getOperation("unlockRobotAxes")
       else
-        rtt.logl("Error",v.." has no required operation unlockRobotAxes")
-		raise_common_event("e_emergency") 
+        rtt.logl("Warning",v.." has no operation unlockRobotAxes")
+		--raise_common_event("e_emergency") 
       end
       if peertable[v]:hasOperation("lockRobotAxes") then
         lockRobotTable[#lockRobotTable+1] = peertable[v]:getOperation("lockRobotAxes")
       else
-        rtt.logl("Error",v.." has no required operation lockRobotAxes")
-		raise_common_event("e_emergency") 
+        rtt.logl("Warning",v.." has no operation lockRobotAxes")
+		--raise_common_event("e_emergency") 
       end
     end
 end
