@@ -57,7 +57,7 @@ protected:
 	///output: modified minimum level of constraint (at velocity level)
 	RTT::OutputPort<KDL::JntArray> ydot_max_port;
 public:
-	ConstraintControllerInequality(std::string name, TaskState initial_state = Stopped) :
+	ConstraintControllerInequality(const std::string & name, TaskState initial_state = Stopped) :
 		ConstraintController(name, initial_state)
 	{
 		//OUTPUT

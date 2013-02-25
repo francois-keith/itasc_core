@@ -101,7 +101,7 @@ public:
     virtual void updateOutputEquation()=0;
     virtual void updateController()=0;
 
-	ConstraintController(std::string name, TaskState initial_state = Stopped) :
+	ConstraintController(const std::string & name, TaskState initial_state = Stopped) :
 		TaskContext(name, initial_state),
 		Cf(Eigen::Matrix<double, 6, 6>::Zero()),
 		Cq(Eigen::Matrix<double, 6, 6>::Zero()),
