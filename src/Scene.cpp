@@ -1188,11 +1188,13 @@ void Scene::calculateA()
 				bool hasinequalities = !(constraint->isEqualityConstraint());
 
 				if(hasinequalities){//constraintController has inequalities
-					//therefor we are sure we can cast to CCInequalityStruct a this point.
-					((ConstraintControllerInequalityStruct*) constraint) -> 
-								  	ydot_max_port.read( ((ConstraintControllerInequalityStruct*) constraint)->y_max_local);
+					//therefore we are sure we can cast to CCInequalityStruct at this point.
+					ConstraintControllerInequalityStruct* constraintIneq =
+							static_cast<ConstraintControllerInequalityStruct*> (constraint);
+					constraintIneq->ydot_max_port.read( constraintIneq->y_max_local);
 					priorities[m]->ydotmax_priority.segment(constraint->start_index, constraint->nc) = 
-									((ConstraintControllerInequalityStruct*) constraint)->y_max_local.data;
+							constraintIneq->y_max_local.data;
+
 					//priorities[m]->ydot_inequalities_priority.segment(constraint->start_index, constraint->nc) = 1;
 					//set inequalities to 1 if lower bound eq, 2 for upper, 3 for both.
 					for(unsigned int k = 0; k < constraint -> nc; k++){
