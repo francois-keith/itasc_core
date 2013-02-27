@@ -183,6 +183,11 @@ bool Scene::addRobot(const string& PeerName, const Frame& T_w_b) {
 		return false;
 	}
 	TaskContext* peer = this->getPeer(PeerName);
+	if (peer == NULL) {
+		log(Error) << "Component '" << PeerName
+				<< "'is not a peer of the Scene." << endlog();
+		return false;
+	}
 	//check if peer is a valid SubRobot class
 	SubRobot* robotp = dynamic_cast<SubRobot*> (peer);
 	if (robotp == NULL) {

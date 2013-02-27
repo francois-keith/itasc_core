@@ -225,11 +225,15 @@ end
 --- Function containing RTT specific info to start TrajectoryGenerators
 function startTrajectoryGenerators()
     for i=1,#setpointGeneratorTable do
-      if not ApplicationSupPeertable[setpointGeneratorTable[i]]:getState()=='Running' then
+      if ApplicationSupPeertable[setpointGeneratorTable[i]]:getState()~='Running' then
         if not ApplicationSupPeertable[setpointGeneratorTable[i]]:start() then
           rtt.logl("Error","unable to start "..setpointGeneratorTable[i])
           raise_common_event("e_emergency") 
+        else
+          rtt.logl("Info",setpointGeneratorTable[i].." started")
         end
+      else
+        rtt.logl("Info", setpointGeneratorTable[i].." was already started")
       end
     end
 end
@@ -248,7 +252,7 @@ end
 --- Function containing RTT specific info to stop TrajectoryGenerators
 function stopTrajectoryGenerators()
     for i=1,#setpointGeneratorTable do
-      if not ApplicationSupPeertable[setpointGeneratorTable[i]]:getState()=='Stopped' then
+      if ApplicationSupPeertable[setpointGeneratorTable[i]]:getState()~='Stopped' then
         if not ApplicationSupPeertable[setpointGeneratorTable[i]]:stop() then
           rtt.logl("Error","unable to stop "..setpointGeneratorTable[i])
           raise_common_event("e_emergency") 
