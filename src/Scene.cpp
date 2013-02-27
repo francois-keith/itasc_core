@@ -1199,8 +1199,9 @@ void Scene::calculateA()
 						priorities[m]->ydot_inequalities_priority[(constraint->start_index) + k] = 3;
 					}
 				}
-				else{//constraintController doesn't have inequalities
-					//put same values on ydot_max as on regular ydot
+				else
+				{ //constraintController doesn't have inequalities:
+					//put arbitraries values on ydot_max, and reset on regular ydot_inequalities_priority
 					priorities[m]->ydotmax_priority.segment(constraint->start_index, constraint->nc) = constraint->y_dot_local.data;
 					//set corresponding segment of inequalities vector to zero, since it's isn't a constraintcontroller
 					for (unsigned i=constraint->start_index; i<constraint->start_index + constraint->nc; ++i)
